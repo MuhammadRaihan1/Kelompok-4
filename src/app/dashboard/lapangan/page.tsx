@@ -264,18 +264,7 @@
                   </span>
                 </a>
 
-                {/* PEMBAYARAN */}
-
-                <a
-                  href="/dashboard/pembayaran"
-                  className="flex items-center gap-3 rounded-xl px-3 py-3 text-slate-400 transition hover:bg-slate-900 hover:text-white"
-                >
-                  <PaymentIcon />
-
-                  <span>
-                    Pembayaran
-                  </span>
-                </a>
+              
 
                 {/* RIWAYAT */}
 
