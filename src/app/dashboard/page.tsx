@@ -116,26 +116,7 @@ export default async function DashboardPage() {
                 Pesan Lapangan
               </a>
 
-              {/* Pembayaran */}
-              <a
-                href="/dashboard/pembayaran"
-                className="flex items-center gap-3 px-3 py-3 rounded-xl text-slate-400 hover:bg-slate-900 hover:text-white transition"
-              >
-                <svg
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.8"
-                >
-                  <rect x="3" y="5" width="18" height="14" rx="2" />
-                  <path d="M3 10h18" />
-                  <path d="M7 15h4" />
-                </svg>
-
-                Pembayaran
-              </a>
+              
 
               {/* Riwayat */}
               <a

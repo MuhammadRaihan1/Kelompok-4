@@ -2,23 +2,62 @@
 
 import { useState } from "react";
 import { authClient } from "@/lib/auth-client";
+import Image from "next/image";
+import { signIn, useSession, signOut } from "@/lib/auth-client";
+import Link from "next/link";
 
 export default function LoginPage() {
+  const { data: session, isPending } = useSession();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    await signIn.email(
+      {
+        email,
+        password,
+        callbackURL: "/dashboard",
+      },
+      {
+        onError: (ctx) => {
+          alert(ctx.error.message);
+          setLoading(false);
+        },
+      }
+    );
+  };
 
   const handleGoogleLogin = async () => {
     setLoading(true);
 
-    try {
-      await authClient.signIn.social({
+    await signIn.social(
+      {
         provider: "google",
         callbackURL: "/dashboard",
-      });
-    } catch (error) {
-      console.error("Google login error:", error);
-      setLoading(false);
-    }
+      },
+      {
+        onError: (ctx) => {
+          alert(ctx.error.message);
+          setLoading(false);
+        },
+      }
+    );
   };
+
+  if (isPending) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#eef0e8] text-[#18231d]">
+        <div className="flex items-center gap-3 rounded-full bg-white px-5 py-3 shadow-sm">
+          <div className="h-5 w-5 animate-spin rounded-full border-2 border-[#b7d334] border-t-transparent" />
+          <p className="text-sm font-semibold">Memeriksa status akun...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <main className="min-h-screen bg-white flex">
@@ -28,21 +67,29 @@ export default function LoginPage() {
       ========================== */}
       <section className="hidden lg:flex lg:w-1/2 bg-slate-950 text-white relative overflow-hidden">
 
-        {/* Background Decoration */}
-        <div className="absolute -top-32 -left-32 w-96 h-96 rounded-full bg-slate-800 opacity-50" />
-        <div className="absolute -bottom-40 -right-20 w-[500px] h-[500px] rounded-full bg-slate-800 opacity-40" />
+        {/* Background Image */}
+        <img
+          src="/lapangan.jpeg"
+          alt="Lapangan"
+          className="absolute inset-0 w-full h-full object-cover opacity-40"
+        />
+        <div className="absolute inset-0 bg-green-500/20" />
 
         <div className="relative z-10 flex flex-col justify-between w-full p-12 xl:p-16">
 
-          {/* Logo */}
+          {/*Logo */}
           <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-xl bg-white text-slate-950 flex items-center justify-center font-bold text-xl">
-              L
-            </div>
-
-            <span className="text-2xl font-bold tracking-tight">
-              Lapangin
-            </span>
+          <div className="w-11 h-11 rounded-full bg-white text-slate-950 flex items-center justify-center font-bold text-xl overflow-hidden relative">
+          <img
+               src="/logo2.jpg"
+               alt="Logo Lapangin"
+                className="w-full h-full object-cover"
+           />
+          </div>
+          {/* Nama Brand */}
+          <span className="text-2xl font-bold tracking-tight">
+          Lapangin
+          </span>
           </div>
 
           {/* Main Content */}
@@ -128,263 +175,50 @@ export default function LoginPage() {
       </section>
 
 
-      {/* =========================
-          RIGHT SIDE - LOGIN
-      ========================== */}
-      <section className="w-full lg:w-1/2 flex items-center justify-center bg-slate-50 px-5 py-10">
-
-        <div className="w-full max-w-md">
-
-          {/* Mobile Logo */}
-          <div className="lg:hidden flex items-center justify-center gap-3 mb-10">
-
-            <div className="w-11 h-11 rounded-xl bg-slate-950 text-white flex items-center justify-center font-bold text-xl">
-              L
+       <section className="px-6 py-10 sm:px-12 sm:py-14 lg:px-16">
+          <div className="mb-10 flex content-center items-center justify-between lg:hidden">
+            <div className="flex items-center gap-3">
+              <Image   src="/logo2.jpg" alt="Logo Booking Lapangan" width={40} height={40} className="h-10 w-10 rounded-xl" />
+              <span className="text-xs font-black uppercase tracking-[0.16em] text-[#26372b]">Booking Lapangan</span>
             </div>
-
-            <span className="text-2xl font-bold text-slate-950">
-              Lapangin
-            </span>
-
           </div>
 
+          <div className="max-w-md">
+            <p className="text-xs font-bold uppercase tracking-[0.24em] text-[#82913c]">Selamat datang</p>
+            <h2 className="mt-3 text-4xl font-black tracking-[-0.04em] text-[#26372b] sm:text-5xl">Masuk ke akunmu.</h2>
+            <p className="mt-4 text-sm leading-6 text-[#718078]">Lanjutkan rencana pertandinganmu hari ini.</p>
 
-          {/* Login Header */}
-          <div className="mb-8">
-
-            <h1 className="text-3xl font-bold tracking-tight text-slate-950">
-              Selamat datang kembali
-            </h1>
-
-            <p className="mt-2 text-slate-500">
-              Masuk ke akun Lapangin untuk melanjutkan.
-            </p>
-
-          </div>
-
-
-          {/* Login Card */}
-          <div className="bg-white border border-slate-200 rounded-2xl p-6 sm:p-8 shadow-sm">
-
-            {/* Email */}
-            <div className="mb-5">
-
-              <label
-                htmlFor="email"
-                className="block text-sm font-semibold text-slate-700 mb-2"
-              >
-                Email
-              </label>
-
-              <input
-                id="email"
-                type="email"
-                placeholder="nama@email.com"
-                className="
-                  w-full h-12 px-4
-                  rounded-xl
-                  border border-slate-300
-                  bg-white
-                  text-slate-900
-                  placeholder:text-slate-400
-                  outline-none
-                  transition
-                  focus:border-slate-900
-                  focus:ring-4
-                  focus:ring-slate-900/5
-                "
-              />
-
-            </div>
-
-
-            {/* Password */}
-            <div className="mb-6">
-
-              <div className="flex items-center justify-between mb-2">
-
-                <label
-                  htmlFor="password"
-                  className="text-sm font-semibold text-slate-700"
-                >
-                  Password
-                </label>
-
-                <button
-                  type="button"
-                  className="text-sm font-medium text-slate-500 hover:text-slate-900 transition"
-                >
-                  Lupa password?
-                </button>
-
+            <form onSubmit={handleSubmit} className="mt-9 space-y-5">
+              <div>
+                <label htmlFor="email" className="mb-2 block text-xs font-bold uppercase tracking-[0.16em] text-[#526157]">Email</label>
+                <input id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="nama@email.com" className="w-full rounded-xl border border-[#dce1d5] bg-[#f8f9f5] px-4 py-3.5 text-sm text-[#26372b] outline-none transition placeholder:text-[#a3ada5] focus:border-[#9eb82d] focus:bg-white focus:ring-4 focus:ring-[#b7d334]/15" />
               </div>
 
-              <input
-                id="password"
-                type="password"
-                placeholder="Masukkan password"
-                className="
-                  w-full h-12 px-4
-                  rounded-xl
-                  border border-slate-300
-                  bg-white
-                  text-slate-900
-                  placeholder:text-slate-400
-                  outline-none
-                  transition
-                  focus:border-slate-900
-                  focus:ring-4
-                  focus:ring-slate-900/5
-                "
-              />
+              <div>
+                <label htmlFor="password" className="mb-2 block text-xs font-bold uppercase tracking-[0.16em] text-[#526157]">Password</label>
+                <input id="password" type="password" required value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Masukkan password" className="w-full rounded-xl border border-[#dce1d5] bg-[#f8f9f5] px-4 py-3.5 text-sm text-[#26372b] outline-none transition placeholder:text-[#a3ada5] focus:border-[#9eb82d] focus:bg-white focus:ring-4 focus:ring-[#b7d334]/15" />
+                <a href="#forgot" className="mt-2 block text-right text-xs font-bold text-[#82913c] hover:text-[#526157]">Lupa password?</a>
+              </div>
 
+              <button type="submit" disabled={loading} className="w-full rounded-xl bg-[#26372b] py-4 text-sm font-bold text-[#e5f28e] shadow-lg shadow-[#26372b]/20 transition hover:bg-[#344b39] active:scale-[0.99] disabled:cursor-wait disabled:opacity-60">
+                {loading ? "Memproses..." : "Masuk Sekarang"}
+              </button>
+            </form>
+
+            <div className="my-7 flex items-center gap-4 text-[10px] font-bold uppercase tracking-[0.18em] text-[#a3ada5]">
+              <div className="h-px flex-1 bg-[#e5e9e1]" />
+              <span>atau</span>
+              <div className="h-px flex-1 bg-[#e5e9e1]" />
             </div>
 
-
-            {/* Remember Me */}
-            <div className="flex items-center gap-2 mb-6">
-
-              <input
-                id="remember"
-                type="checkbox"
-                className="w-4 h-4 rounded border-slate-300 accent-slate-950"
-              />
-
-              <label
-                htmlFor="remember"
-                className="text-sm text-slate-500 cursor-pointer"
-              >
-                Ingat saya
-              </label>
-
-            </div>
-
-
-            {/* Login Button */}
-            <button
-              type="button"
-              className="
-                w-full h-12
-                rounded-xl
-                bg-slate-950
-                text-white
-                font-semibold
-                transition
-                hover:bg-slate-800
-                active:scale-[0.99]
-              "
-            >
-              Masuk
+            <button type="button" onClick={handleGoogleLogin} disabled={loading} className="flex w-full items-center justify-center gap-3 rounded-xl border border-[#dce1d5] bg-white px-4 py-3.5 text-sm font-bold text-[#526157] transition hover:border-[#b7c6ad] hover:bg-[#f8f9f5] disabled:cursor-wait disabled:opacity-60">
+              <span className="flex h-6 w-6 items-center justify-center rounded-full border border-[#dce1d5] text-sm font-black text-[#4285F4]">G</span>
+              {loading ? "Menghubungkan..." : "Lanjutkan dengan Google"}
             </button>
 
-
-            {/* Divider */}
-            <div className="flex items-center gap-4 my-6">
-
-              <div className="h-px bg-slate-200 flex-1" />
-
-              <span className="text-xs font-medium uppercase tracking-wider text-slate-400">
-                atau
-              </span>
-
-              <div className="h-px bg-slate-200 flex-1" />
-
-            </div>
-
-
-            {/* =========================
-                GOOGLE LOGIN
-            ========================== */}
-            <button
-              type="button"
-              onClick={handleGoogleLogin}
-              disabled={loading}
-              className="
-                w-full h-12
-                rounded-xl
-                border border-slate-300
-                bg-white
-                text-slate-700
-                font-semibold
-                transition
-                hover:bg-slate-50
-                hover:border-slate-400
-                active:scale-[0.99]
-                flex items-center justify-center gap-3
-                disabled:opacity-60
-                disabled:cursor-not-allowed
-              "
-            >
-
-              {/* Google Icon */}
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-              >
-                <path
-                  d="M21.805 12.23c0-.79-.065-1.54-.21-2.25H12v4.255h5.495a4.7 4.7 0 0 1-2.04 3.09v2.565h3.3c1.93-1.78 3.05-4.4 3.05-7.66Z"
-                  fill="#4285F4"
-                />
-
-                <path
-                  d="M12 22c2.76 0 5.07-.91 6.755-2.465l-3.3-2.565c-.915.615-2.08.98-3.455.98-2.66 0-4.915-1.795-5.725-4.21H2.865v2.65A10.2 10.2 0 0 0 12 22Z"
-                  fill="#34A853"
-                />
-
-                <path
-                  d="M6.275 13.74A6.12 6.12 0 0 1 5.955 12c0-.605.11-1.195.32-1.74V7.61H2.865A10.02 10.02 0 0 0 1.8 12c0 1.62.39 3.15 1.065 4.39l3.41-2.65Z"
-                  fill="#FBBC05"
-                />
-
-                <path
-                  d="M12 6.05c1.5 0 2.845.515 3.905 1.525l2.93-2.93C17.065 2.99 14.755 2 12 2a10.2 10.2 0 0 0-9.135 5.61l3.41 2.65C7.085 7.845 9.34 6.05 12 6.05Z"
-                  fill="#EA4335"
-                />
-              </svg>
-
-              {loading
-                ? "Menghubungkan..."
-                : "Lanjutkan dengan Google"}
-
-            </button>
-
-
-            {/* Register */}
-            <div className="text-center mt-7">
-
-              <p className="text-sm text-slate-500">
-                Belum punya akun?{" "}
-
-                <a
-                  href="/register"
-                  className="font-semibold text-slate-950 hover:underline"
-                >
-                  Daftar sekarang
-                </a>
-              </p>
-
-            </div>
-
+            <p className="mt-8 text-center text-sm text-[#718078]">Belum punya akun? <Link href="/register" className="font-bold text-[#82913c] hover:text-[#526157]">Daftar di sini</Link></p>
           </div>
-
-
-          {/* Security Info */}
-          <div className="flex items-center justify-center gap-2 mt-6 text-xs text-slate-400">
-
-            <span>🔒</span>
-
-            <span>
-              Login aman dan terenkripsi
-            </span>
-
-          </div>
-
-        </div>
-
-      </section>
-
+        </section>
     </main>
   );
 }
