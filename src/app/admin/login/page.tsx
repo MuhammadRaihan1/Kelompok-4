@@ -1,14 +1,54 @@
 "use client";
 
 import { useState } from "react";
-import { authClient } from "@/lib/auth-client";
+import { useRouter } from "next/navigation";
+import { authClient } from "@/lib/auth-client"; // atau penamaan authClient Anda
 
-export default function LoginPage() {
+export default function AdminLoginPage() {
+  const router = useRouter();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleGoogleLogin = async () => {
+  // 1. HANDLER LOGIN EMAIL & PASSWORD (Manual)
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
     setLoading(true);
 
+    try {
+      await authClient.signIn.email(
+        {
+          email,
+          password,
+          // Bebas tentukan callbackURL awal, nanti middleware bisa mengoreksinya
+          callbackURL: "/admin/dashboard",
+        },
+        {
+          onSuccess: (ctx) => {
+            // Cek jika akun yang login benar-benar admin
+            if (ctx.data?.user?.role === "admin") {
+              router.push("/admin/dashboard");
+            } else {
+              // Jika user biasa mencoba login dari halaman admin
+              alert("Akses ditolak: Anda bukan Admin.");
+              router.push("/dashboard");
+            }
+          },
+          onError: (ctx) => {
+            alert(ctx.error.message || "Email atau password salah.");
+            setLoading(false);
+          },
+        }
+      );
+    } catch {
+      alert("Terjadi kesalahan sistem saat melakukan login.");
+      setLoading(false);
+    }
+  };
+
+  // 2. HANDLER LOGIN GOOGLE
+  const handleGoogleLogin = async () => {
+    setLoading(true);
     try {
       await authClient.signIn.social({
         provider: "google",
@@ -16,9 +56,11 @@ export default function LoginPage() {
       });
     } catch (error) {
       console.error("Google login error:", error);
+      alert("Gagal terhubung dengan Google.");
       setLoading(false);
     }
   };
+
 
   return (
     <main
@@ -44,171 +86,38 @@ export default function LoginPage() {
             </span>
           </div>
           {/* Login Card */}
-          <div className="bg-white/95 border border-slate-200 rounded-2xl p-6 sm:p-8 shadow-lg backdrop-blur-sm">
-           <h1 className="text-3xl flex items-center justify-center font-bold tracking-tight text-black">
-              Login Admin
-            </h1>
-            <p className="mt-2 flex items-center justify-center text-black/70">
-              Masuk ke akun admin Lapangin untuk melanjutkan.
-            </p>
-            {/* Email */}
-            <div className="mb-5">
-              <label
-                htmlFor="email"
-                className="block text-sm font-semibold text-slate-700 mb-2"
-              >
-                Email
-              </label>
-
-              <input
-                id="email"
-                type="email"
-                placeholder="nama@email.com"
-                className="
-                  w-full h-12 px-4
-                  rounded-xl
-                  border border-slate-300
-                  bg-white
-                  text-slate-900
-                  placeholder:text-slate-400
-                  outline-none
-                  transition
-                  focus:border-slate-900
-                  focus:ring-4
-                  focus:ring-slate-900/5
-                "
-              />
-            </div>
-
-            {/* Password */}
-            <div className="mb-6">
-              <div className="flex items-center justify-between mb-2">
-                <label
-                  htmlFor="password"
-                  className="text-sm font-semibold text-slate-700"
-                >
-                  Password
-                </label>
-
-                <button
-                  type="button"
-                  className="text-sm font-medium text-slate-500 hover:text-slate-900 transition"
-                >
-                  Lupa password?
-                </button>
+          <div className="rounded-3xl border border-white/30 bg-white/95 p-6 shadow-2xl backdrop-blur-md sm:p-8">
+           <p className="text-xs font-bold uppercase tracking-[0.24em] text-[#82913c]">Selamat datang</p>
+            <h2 className="mt-3 text-4xl font-black tracking-[-0.04em] text-[#26372b] sm:text-3xl">Login Admin.</h2>
+          <form onSubmit={handleSubmit} className="mt-9 space-y-5">
+              <div>
+                <label htmlFor="email" className="mb-2 block text-xs font-bold uppercase tracking-[0.16em] text-[#526157]">Email</label>
+                <input id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="nama@gmail.com" className="w-full rounded-xl border border-[#dce1d5] bg-[#f8f9f5] px-4 py-3.5 text-sm text-[#26372b] outline-none transition placeholder:text-[#a3ada5] focus:border-[#9eb82d] focus:bg-white focus:ring-4 focus:ring-[#b7d334]/15" />
               </div>
 
-              <input
-                id="password"
-                type="password"
-                placeholder="Masukkan password"
-                className="
-                  w-full h-12 px-4
-                  rounded-xl
-                  border border-slate-300
-                  bg-white
-                  text-slate-900
-                  placeholder:text-slate-400
-                  outline-none
-                  transition
-                  focus:border-slate-900
-                  focus:ring-4
-                  focus:ring-slate-900/5
-                "
-              />
+              <div>
+                <label htmlFor="password" className="mb-2 block text-xs font-bold uppercase tracking-[0.16em] text-[#526157]">Password</label>
+                <input id="password" type="password" required value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Masukkan password" className="w-full rounded-xl border border-[#dce1d5] bg-[#f8f9f5] px-4 py-3.5 text-sm text-[#26372b] outline-none transition placeholder:text-[#a3ada5] focus:border-[#9eb82d] focus:bg-white focus:ring-4 focus:ring-[#b7d334]/15" />
+                <a href="#forgot" className="mt-2 block text-right text-xs font-bold text-[#82913c] hover:text-[#526157]">Lupa password?</a>
+              </div>
+
+              <button type="submit" disabled={loading} className="w-full rounded-xl bg-[#26372b] py-4 text-sm font-bold text-[#e5f28e] shadow-lg shadow-[#26372b]/20 transition hover:bg-[#344b39] active:scale-[0.99] disabled:cursor-wait disabled:opacity-60">
+                {loading ? "Memproses..." : "Masuk Sekarang"}
+              </button>
+            </form>
+
+            <div className="my-7 flex items-center gap-4 text-[10px] font-bold uppercase tracking-[0.18em] text-[#a3ada5]">
+              <div className="h-px flex-1 bg-[#e5e9e1]" />
+              <span>atau</span>
+              <div className="h-px flex-1 bg-[#e5e9e1]" />
             </div>
 
-            {/* Remember Me */}
-            <div className="flex items-center gap-2 mb-6">
-              <input
-                id="remember"
-                type="checkbox"
-                className="w-4 h-4 rounded border-slate-300 accent-slate-950"
-              />
-
-              <label
-                htmlFor="remember"
-                className="text-sm text-slate-500 cursor-pointer"
-              >
-                Ingat saya
-              </label>
-            </div>
-
-            {/* Login Button */}
-            <button
-              type="button"
-              className="
-                w-full h-12
-                rounded-xl
-                bg-slate-950
-                text-white
-                font-semibold
-                transition
-                hover:bg-slate-800
-                active:scale-[0.99]
-              "
-            >
-              Masuk
-            </button>
-
-            {/* Divider */}
-            <div className="flex items-center gap-4 my-6">
-              <div className="h-px bg-slate-200 flex-1" />
-              <span className="text-xs font-medium uppercase tracking-wider text-slate-400">
-                atau
-              </span>
-              <div className="h-px bg-slate-200 flex-1" />
-            </div>
-
-            {/* Google Login */}
-            <button
-              type="button"
-              onClick={handleGoogleLogin}
-              disabled={loading}
-              className="
-                w-full h-12
-                rounded-xl
-                border border-slate-300
-                bg-white
-                text-slate-700
-                font-semibold
-                transition
-                hover:bg-slate-50
-                hover:border-slate-400
-                active:scale-[0.99]
-                flex items-center justify-center gap-3
-                disabled:opacity-60
-                disabled:cursor-not-allowed
-              "
-            >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                <path
-                  d="M21.805 12.23c0-.79-.065-1.54-.21-2.25H12v4.255h5.495a4.7 4.7 0 0 1-2.04 3.09v2.565h3.3c1.93-1.78 3.05-4.4 3.05-7.66Z"
-                  fill="#4285F4"
-                />
-                <path
-                  d="M12 22c2.76 0 5.07-.91 6.755-2.465l-3.3-2.565c-.915.615-2.08.98-3.455.98-2.66 0-4.915-1.795-5.725-4.21H2.865v2.65A10.2 10.2 0 0 0 12 22Z"
-                  fill="#34A853"
-                />
-                <path
-                  d="M6.275 13.74A6.12 6.12 0 0 1 5.955 12c0-.605.11-1.195.32-1.74V7.61H2.865A10.02 10.02 0 0 0 1.8 12c0 1.62.39 3.15 1.065 4.39l3.41-2.65Z"
-                  fill="#FBBC05"
-                />
-                <path
-                  d="M12 6.05c1.5 0 2.845.515 3.905 1.525l2.93-2.93C17.065 2.99 14.755 2 12 2a10.2 10.2 0 0 0-9.135 5.61l3.41 2.65C7.085 7.845 9.34 6.05 12 6.05Z"
-                  fill="#EA4335"
-                />
-              </svg>
-
+            <button type="button" onClick={handleGoogleLogin} disabled={loading} className="flex w-full items-center justify-center gap-3 rounded-xl border border-[#dce1d5] bg-white px-4 py-3.5 text-sm font-bold text-[#526157] transition hover:border-[#b7c6ad] hover:bg-[#f8f9f5] disabled:cursor-wait disabled:opacity-60">
+              <span className="flex h-6 w-6 items-center justify-center rounded-full border border-[#dce1d5] text-sm font-black text-[#4285F4]">G</span>
               {loading ? "Menghubungkan..." : "Lanjutkan dengan Google"}
             </button>
-
-            <div className="flex items-center justify-center gap-2 mt-6 text-xs text-slate-400">
-              <span>🔒</span>
-              <span>Login aman dan terenkripsi</span>
-            </div>
           </div>
-        </div>
+          </div>
       </section>
     </main>
   );

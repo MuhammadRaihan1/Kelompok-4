@@ -109,10 +109,12 @@ model Admin {
 model Lapangan {
   id          String  @id @default(uuid())
   name        String
+  category    String  @default("Futsal")
   description String?
   location    String
   price       Float
   picture_url String?
+  isActive    Boolean @default(true)
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
