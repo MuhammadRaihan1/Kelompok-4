@@ -626,7 +626,7 @@ export default async function AdminCustomerPage({
 
               <Icon type="booking" />
 
-              Booking
+              Riwayat Pemesanan
 
             </Link>
 
@@ -639,24 +639,15 @@ export default async function AdminCustomerPage({
               <Icon type="users" />
 
               Manajemen User
-
-            </Link>
-
-
-            <p className="mb-3 mt-7 px-3 text-xs font-bold uppercase tracking-wider text-slate-500">
-              Laporan
-            </p>
-
-
+              </Link>
             <Link
-              href="/admin/booking"
+              href="/admin/laporan"
               className="flex items-center gap-3 rounded-xl px-3 py-3 text-slate-400 transition hover:bg-slate-900 hover:text-white"
             >
 
               <Icon type="history" />
 
-              Riwayat Booking
-
+              Laporan Pendapatan
             </Link>
 
           </nav>

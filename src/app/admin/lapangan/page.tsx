@@ -263,7 +263,7 @@ export default async function AdminLapanganPage() {
               {/* USER */}
 
               <a
-                href="/admin/users"
+                href="/admin/customer"
                 className="flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium text-slate-400 transition hover:bg-slate-900 hover:text-white"
               >
                 <UsersIcon />

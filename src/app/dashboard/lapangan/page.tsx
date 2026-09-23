@@ -218,82 +218,54 @@
             ================================================= */}
 
             <nav className="flex-1 px-4 py-6">
+  <p className="mb-3 px-3 text-xs font-semibold uppercase tracking-wider text-slate-500">
+    Menu Utama
+  </p>
 
-              <p className="mb-3 px-3 text-xs font-semibold uppercase tracking-wider text-slate-500">
-                Menu Utama
-              </p>
+  <div className="space-y-1">
 
-              <div className="space-y-1">
+    {/* DASHBOARD */}
+   {/* DASHBOARD */}
+<a
+  href="/dashboard"
+  className="flex items-center gap-3 rounded-xl px-3 py-3 text-slate-400 transition hover:bg-slate-900 hover:text-white"
+>
+  <DashboardIcon />
+  <span>Dashboard</span>
+</a>
 
-                {/* DASHBOARD */}
+{/* LAPANGAN */}
+<a
+  href="/dashboard/lapangan"
+  className="flex items-center gap-3 rounded-xl bg-slate-800 px-3 py-3 font-medium text-white"
+>
+  <FieldIcon />
+  <span>Lapangan</span>
+</a>
 
-                <a
-                  href="/dashboard"
-                  className="flex items-center gap-3 rounded-xl px-3 py-3 text-slate-400 transition hover:bg-slate-900 hover:text-white"
-                >
-                  <DashboardIcon />
+    {/* PESAN LAPANGAN */}
+    <a
+      href="/dashboard/booking"
+      className="flex items-center gap-3 rounded-xl px-3 py-3 text-slate-400 transition hover:bg-slate-900 hover:text-white"
+    >
+      <BookingIcon />
 
-                  <span>
-                    Dashboard
-                  </span>
-                </a>
+      <span>
+        Pesan Lapangan
+      </span>
+    </a>
 
-                {/* LAPANGAN */}
+    {/* RIWAYAT */}
+    <a
+      href="/dashboard/riwayat"
+      className="flex items-center gap-3 rounded-xl px-3 py-3 text-slate-400 transition hover:bg-slate-900 hover:text-white"
+    >
+      <HistoryIcon />
 
-                <a
-                  href="/dashboard/lapangan"
-                  className="flex items-center gap-3 rounded-xl bg-slate-800 px-3 py-3 font-medium text-white"
-                >
-                  <FieldIcon />
-
-                  <span>
-                    Lapangan
-                  </span>
-                </a>
-
-                {/* PESAN LAPANGAN */}
-
-                <a
-                  href="/dashboard/booking"
-                  className="flex items-center gap-3 rounded-xl px-3 py-3 text-slate-400 transition hover:bg-slate-900 hover:text-white"
-                >
-                  <BookingIcon />
-
-                  <span>
-                    Pesan Lapangan
-                  </span>
-                </a>
-
-                {/* PESAN LAPANGAN */}
-                <a
-                  href="/dashboard/booking"
-                  className="flex items-center gap-3 rounded-xl px-3 py-3 text-slate-400 transition hover:bg-slate-900 hover:text-white"
-                >
-                  <BookingIcon />
-                  <span>Pesan Lapangan</span>
-                </a>
-
-                {/* RIWAYAT */}
-                <a
-                  href="/dashboard/riwayat"
-                  className="flex items-center gap-3 rounded-xl px-3 py-3 text-slate-400 transition hover:bg-slate-900 hover:text-white"
-                >
-                  <HistoryIcon />
-                  <span>Riwayat Pemesanan</span>
-                </a>
-                {/* RIWAYAT */}
-
-                <a
-                  href="/dashboard/riwayat"
-                  className="flex items-center gap-3 rounded-xl px-3 py-3 text-slate-400 transition hover:bg-slate-900 hover:text-white"
-                >
-                  <HistoryIcon />
-
-                  <span>
-                    Riwayat Pemesanan
-                  </span>
-                </a>
-
+      <span>
+        Riwayat Pemesanan
+      </span>
+    </a>
               </div>
 
             </nav>
