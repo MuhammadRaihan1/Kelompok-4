@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import Link from "next/link";
+import { revalidatePath } from "next/cache";
 
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
@@ -40,18 +41,20 @@ function formatJam(date: Date) {
   return new Intl.DateTimeFormat("id-ID", {
     hour: "2-digit",
     minute: "2-digit",
+    hour12: false,
   }).format(date);
 }
 
 
 // ======================================================
-// DURASI
+// HITUNG DURASI
 // ======================================================
 
 function hitungDurasi(start: Date, end: Date) {
-  const selisih = end.getTime() - start.getTime();
-
-  return selisih / (1000 * 60 * 60);
+  return (
+    (end.getTime() - start.getTime()) /
+    (1000 * 60 * 60)
+  );
 }
 
 
@@ -66,7 +69,7 @@ function StatusBadge({
 }) {
   if (status === "CONFIRMED") {
     return (
-      <span className="inline-flex rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-700">
+      <span className="inline-flex rounded-full bg-green-100 px-3 py-1.5 text-xs font-bold text-green-700">
         Dikonfirmasi
       </span>
     );
@@ -74,14 +77,14 @@ function StatusBadge({
 
   if (status === "CANCELLED") {
     return (
-      <span className="inline-flex rounded-full bg-red-100 px-3 py-1 text-xs font-semibold text-red-700">
+      <span className="inline-flex rounded-full bg-red-100 px-3 py-1.5 text-xs font-bold text-red-700">
         Dibatalkan
       </span>
     );
   }
 
   return (
-    <span className="inline-flex rounded-full bg-yellow-100 px-3 py-1 text-xs font-semibold text-yellow-700">
+    <span className="inline-flex rounded-full bg-yellow-100 px-3 py-1.5 text-xs font-bold text-yellow-700">
       Menunggu
     </span>
   );
@@ -89,10 +92,10 @@ function StatusBadge({
 
 
 // ======================================================
-// ICON COMPONENT
+// ICON
 // ======================================================
 
-function MenuIcon({
+function Icon({
   type,
 }: {
   type:
@@ -218,10 +221,10 @@ function SearchIcon() {
 
 
 // ======================================================
-// ADMIN DASHBOARD
+// ADMIN BOOKING
 // ======================================================
 
-export default async function AdminDashboard() {
+export default async function AdminBookingPage() {
 
   // ====================================================
   // CEK SESSION
@@ -272,57 +275,131 @@ export default async function AdminDashboard() {
 
 
   // ====================================================
-  // AMBIL DATA DASHBOARD
+  // SERVER ACTION KONFIRMASI / PEMBATALAN
   // ====================================================
 
-  const [
-    totalBooking,
-    totalCustomer,
-    totalLapangan,
-    pendingBooking,
-    confirmedBooking,
-    cancelledBooking,
-    bookingTerbaru,
-  ] = await Promise.all([
+  async function updateBookingStatus(
+    formData: FormData
+  ) {
+    "use server";
 
-    // Total booking
-    prisma.booking.count(),
+    const bookingId =
+      formData.get("bookingId")?.toString();
 
-    // Total customer
-    prisma.customer.count(),
+    const status =
+      formData.get("status")?.toString();
 
-    // Total lapangan
-    prisma.lapangan.count({
+
+    if (!bookingId) {
+      return;
+    }
+
+
+    if (
+      status !== "CONFIRMED" &&
+      status !== "CANCELLED"
+    ) {
+      return;
+    }
+
+
+    // -----------------------------------------------
+    // CEK SESSION LAGI
+    // -----------------------------------------------
+
+    const requestHeaders = await headers();
+
+    const currentSession =
+      await auth.api.getSession({
+        headers: requestHeaders,
+      });
+
+
+    if (!currentSession) {
+      redirect("/admin/login");
+    }
+
+
+    // -----------------------------------------------
+    // CEK USER ADMIN
+    // -----------------------------------------------
+
+    const adminUser =
+      await prisma.user.findUnique({
+        where: {
+          id: currentSession.user.id,
+        },
+
+        select: {
+          role: true,
+        },
+      });
+
+
+    if (
+      !adminUser ||
+      adminUser.role !== "ADMIN"
+    ) {
+      redirect("/dashboard");
+    }
+
+
+    // -----------------------------------------------
+    // CEK BOOKING
+    // -----------------------------------------------
+
+    const booking =
+      await prisma.booking.findUnique({
+        where: {
+          id: bookingId,
+        },
+
+        select: {
+          id: true,
+          status: true,
+        },
+      });
+
+
+    if (!booking) {
+      return;
+    }
+
+
+    // -----------------------------------------------
+    // UPDATE STATUS
+    // -----------------------------------------------
+
+    await prisma.booking.update({
       where: {
-        isActive: true,
+        id: bookingId,
       },
-    }),
 
-    // Pending
-    prisma.booking.count({
-      where: {
-        status: "PENDING",
+      data: {
+        status:
+          status === "CONFIRMED"
+            ? "CONFIRMED"
+            : "CANCELLED",
       },
-    }),
+    });
 
-    // Confirmed
-    prisma.booking.count({
-      where: {
-        status: "CONFIRMED",
-      },
-    }),
 
-    // Cancelled
-    prisma.booking.count({
-      where: {
-        status: "CANCELLED",
-      },
-    }),
+    // -----------------------------------------------
+    // REFRESH HALAMAN
+    // -----------------------------------------------
 
-    // Booking terbaru
-    prisma.booking.findMany({
-      take: 8,
+    revalidatePath("/admin/booking");
+    revalidatePath("/admin/dashboard");
+    revalidatePath("/dashboard/riwayat");
+  }
 
+
+  // ====================================================
+  // AMBIL SEMUA BOOKING
+  // ====================================================
+
+  const bookings =
+    await prisma.booking.findMany({
       orderBy: {
         createdAt: "desc",
       },
@@ -339,64 +416,87 @@ export default async function AdminDashboard() {
           take: 1,
         },
       },
-    }),
-  ]);
-
-
-  // ====================================================
-  // PENDAPATAN
-  // ====================================================
-
-  const confirmedData =
-    await prisma.booking.findMany({
-      where: {
-        status: "CONFIRMED",
-      },
-
-      include: {
-        lapangan: true,
-      },
     });
 
 
-  const totalPendapatan =
-    confirmedData.reduce(
-      (total, booking) => {
+  // ====================================================
+  // STATISTIK
+  // ====================================================
 
-        const durasi = hitungDurasi(
-          booking.startTime,
-          booking.endTime
-        );
+  const totalBooking =
+    bookings.length;
 
-        const jumlah =
-          booking.lapangan.price * durasi;
+  const pendingBooking =
+    bookings.filter(
+      (item) =>
+        item.status === "PENDING"
+    ).length;
 
-        return total + jumlah;
-      },
+  const confirmedBooking =
+    bookings.filter(
+      (item) =>
+        item.status === "CONFIRMED"
+    ).length;
 
-      0
-    );
+  const cancelledBooking =
+    bookings.filter(
+      (item) =>
+        item.status === "CANCELLED"
+    ).length;
 
 
   // ====================================================
-  // NAMA ADMIN
+  // TOTAL PENDAPATAN
+  // ====================================================
+
+  const totalPendapatan =
+    bookings
+      .filter(
+        (item) =>
+          item.status === "CONFIRMED"
+      )
+      .reduce(
+        (total, booking) => {
+
+          const durasi =
+            hitungDurasi(
+              booking.startTime,
+              booking.endTime
+            );
+
+          return (
+            total +
+            booking.lapangan.price *
+              durasi
+          );
+        },
+
+        0
+      );
+
+
+  // ====================================================
+  // ADMIN PROFILE
   // ====================================================
 
   const namaAdmin =
-    user.name || "Administrator";
-
+    user.name ||
+    "Administrator";
 
   const inisial =
     namaAdmin
       .split(" ")
-      .map((item) => item.charAt(0))
+      .map(
+        (item) =>
+          item.charAt(0)
+      )
       .join("")
       .substring(0, 2)
       .toUpperCase();
 
 
   // ====================================================
-  // RENDER
+  // UI
   // ====================================================
 
   return (
@@ -426,7 +526,7 @@ export default async function AdminDashboard() {
 
             <div>
 
-              <h1 className="text-lg font-bold tracking-tight">
+              <h1 className="text-lg font-bold">
                 Lapangin
               </h1>
 
@@ -450,89 +550,54 @@ export default async function AdminDashboard() {
           </p>
 
 
-          {/* DASHBOARD */}
-
           <Link
             href="/admin/dashboard"
-            className="mb-2 flex items-center gap-4 rounded-xl bg-[#1d2a42] px-4 py-3.5 text-[15px] font-medium text-white transition"
+            className="mb-2 flex items-center gap-4 rounded-xl px-4 py-3.5 text-[15px] font-medium text-[#a6b5cf] transition hover:bg-[#111d31] hover:text-white"
           >
-
-            <MenuIcon type="dashboard" />
-
-            <span>
-              Dashboard
-            </span>
-
+            <Icon type="dashboard" />
+            Dashboard
           </Link>
 
-
-          {/* LAPANGAN */}
 
           <Link
             href="/admin/lapangan"
             className="mb-2 flex items-center gap-4 rounded-xl px-4 py-3.5 text-[15px] font-medium text-[#a6b5cf] transition hover:bg-[#111d31] hover:text-white"
           >
-
-            <MenuIcon type="field" />
-
-            <span>
-              Lapangan
-            </span>
-
+            <Icon type="field" />
+            Lapangan
           </Link>
 
-
-          {/* RIWAYAT */}
 
           <Link
             href="/admin/booking"
-            className="mb-2 flex items-center gap-4 rounded-xl px-4 py-3.5 text-[15px] font-medium text-[#a6b5cf] transition hover:bg-[#111d31] hover:text-white"
+            className="mb-2 flex items-center gap-4 rounded-xl bg-[#1d2a42] px-4 py-3.5 text-[15px] font-medium text-white"
           >
-
-            <MenuIcon type="booking" />
-
-            <span>
-              Riwayat Pemesanan
-            </span>
-
+            <Icon type="booking" />
+            Riwayat Pemesanan
           </Link>
 
-
-          {/* USER */}
 
           <Link
             href="/admin/customer"
             className="mb-2 flex items-center gap-4 rounded-xl px-4 py-3.5 text-[15px] font-medium text-[#a6b5cf] transition hover:bg-[#111d31] hover:text-white"
           >
-
-            <MenuIcon type="user" />
-
-            <span>
-              Manajemen User
-            </span>
-
+            <Icon type="user" />
+            Manajemen User
           </Link>
 
-
-          {/* LAPORAN */}
 
           <Link
             href="/admin/laporan"
             className="flex items-center gap-4 rounded-xl px-4 py-3.5 text-[15px] font-medium text-[#a6b5cf] transition hover:bg-[#111d31] hover:text-white"
           >
-
-            <MenuIcon type="report" />
-
-            <span>
-              Laporan Pendapatan
-            </span>
-
+            <Icon type="report" />
+            Laporan Pendapatan
           </Link>
 
         </div>
 
 
-        {/* BACK USER */}
+        {/* DASHBOARD USER */}
 
         <div className="absolute bottom-0 left-0 right-0 border-t border-white/10 p-5">
 
@@ -540,13 +605,11 @@ export default async function AdminDashboard() {
             href="/dashboard"
             className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm text-[#91a2bf] transition hover:bg-[#111d31] hover:text-white"
           >
-
             <span className="text-lg">
               ←
             </span>
 
             Dashboard User
-
           </Link>
 
         </div>
@@ -560,15 +623,11 @@ export default async function AdminDashboard() {
 
       <main className="lg:ml-[280px]">
 
-        {/* =================================================
-            HEADER
-        ================================================= */}
+        {/* HEADER */}
 
         <header className="sticky top-0 z-30 h-[105px] border-b border-[#e4e8ef] bg-white">
 
           <div className="flex h-full items-center justify-between px-6 sm:px-9">
-
-            {/* TITLE */}
 
             <div>
 
@@ -577,26 +636,22 @@ export default async function AdminDashboard() {
               </p>
 
               <h2 className="mt-1 text-2xl font-bold tracking-tight text-[#07152f]">
-                Dashboard
+                Riwayat Pemesanan
               </h2>
 
             </div>
 
 
-            {/* RIGHT */}
-
             <div className="flex items-center gap-5">
-
-              {/* SEARCH */}
 
               <div className="hidden w-[310px] md:block">
 
-                <div className="flex h-12 items-center gap-3 rounded-xl border border-[#dfe5ed] bg-[#f8fafc] px-4 text-[#13213a]">
+                <div className="flex h-12 items-center gap-3 rounded-xl border border-[#dfe5ed] bg-[#f8fafc] px-4">
 
                   <SearchIcon />
 
                   <span className="text-sm text-[#8c9ab0]">
-                    Cari lapangan...
+                    Cari pemesanan...
                   </span>
 
                 </div>
@@ -604,12 +659,8 @@ export default async function AdminDashboard() {
               </div>
 
 
-              {/* VERTICAL LINE */}
-
               <div className="hidden h-11 w-px bg-[#e1e6ed] md:block" />
 
-
-              {/* PROFILE */}
 
               <div className="flex items-center gap-3">
 
@@ -634,7 +685,7 @@ export default async function AdminDashboard() {
                     {namaAdmin}
                   </p>
 
-                  <p className="mt-0.5 text-xs text-[#91a0b5]">
+                  <p className="text-xs text-[#91a0b5]">
                     Administrator
                   </p>
 
@@ -649,249 +700,108 @@ export default async function AdminDashboard() {
         </header>
 
 
-        {/* =================================================
-            CONTENT
-        ================================================= */}
+        {/* CONTENT */}
 
         <div className="p-6 sm:p-9">
 
-          {/* WELCOME */}
+          {/* TITLE */}
 
           <div className="mb-8">
 
             <p className="text-sm font-medium text-[#8da0bd]">
-              Ringkasan Sistem
+              Manajemen Pemesanan
             </p>
 
-            <h3 className="mt-1 text-2xl font-bold text-[#07152f]">
-              Selamat Datang, {namaAdmin}
+            <h3 className="mt-1 text-3xl font-bold tracking-tight text-[#07152f]">
+              Daftar Pemesanan
             </h3>
 
             <p className="mt-2 text-sm text-[#8190a5]">
-              Pantau aktivitas pemesanan lapangan
-              futsal melalui dashboard admin.
+              Kelola, konfirmasi, dan batalkan
+              pemesanan lapangan futsal.
             </p>
 
           </div>
 
 
           {/* =================================================
-              STAT CARD
+              STATISTIK
           ================================================= */}
 
           <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
 
-            {/* BOOKING */}
+            {/* TOTAL */}
 
             <div className="rounded-2xl border border-[#e2e7ee] bg-white p-6 shadow-sm">
 
-              <div className="flex items-start justify-between">
+              <p className="text-sm font-medium text-[#8392a8]">
+                Total Pemesanan
+              </p>
 
-                <div>
+              <p className="mt-3 text-3xl font-bold text-[#07152f]">
+                {totalBooking}
+              </p>
 
-                  <p className="text-sm font-medium text-[#8392a8]">
-                    Total Pemesanan
-                  </p>
-
-                  <h3 className="mt-3 text-3xl font-bold text-[#07152f]">
-                    {totalBooking}
-                  </h3>
-
-                </div>
-
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#eef2f7] text-[#243858]">
-                  <MenuIcon type="booking" />
-                </div>
-
-              </div>
-
-              <p className="mt-5 text-xs text-[#98a4b5]">
-                Semua data pemesanan
+              <p className="mt-3 text-xs text-[#98a4b5]">
+                Semua pemesanan
               </p>
 
             </div>
 
-
-            {/* CUSTOMER */}
-
-            <div className="rounded-2xl border border-[#e2e7ee] bg-white p-6 shadow-sm">
-
-              <div className="flex items-start justify-between">
-
-                <div>
-
-                  <p className="text-sm font-medium text-[#8392a8]">
-                    Total Pengguna
-                  </p>
-
-                  <h3 className="mt-3 text-3xl font-bold text-[#07152f]">
-                    {totalCustomer}
-                  </h3>
-
-                </div>
-
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#eef2f7] text-[#243858]">
-                  <MenuIcon type="user" />
-                </div>
-
-              </div>
-
-              <p className="mt-5 text-xs text-[#98a4b5]">
-                Pengguna terdaftar
-              </p>
-
-            </div>
-
-
-            {/* LAPANGAN */}
-
-            <div className="rounded-2xl border border-[#e2e7ee] bg-white p-6 shadow-sm">
-
-              <div className="flex items-start justify-between">
-
-                <div>
-
-                  <p className="text-sm font-medium text-[#8392a8]">
-                    Lapangan Aktif
-                  </p>
-
-                  <h3 className="mt-3 text-3xl font-bold text-[#07152f]">
-                    {totalLapangan}
-                  </h3>
-
-                </div>
-
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#eef2f7] text-[#243858]">
-                  <MenuIcon type="field" />
-                </div>
-
-              </div>
-
-              <p className="mt-5 text-xs text-[#98a4b5]">
-                Lapangan tersedia
-              </p>
-
-            </div>
-
-
-            {/* PENDAPATAN */}
-
-            <div className="rounded-2xl border border-[#e2e7ee] bg-white p-6 shadow-sm">
-
-              <div className="flex items-start justify-between">
-
-                <div>
-
-                  <p className="text-sm font-medium text-[#8392a8]">
-                    Pendapatan
-                  </p>
-
-                  <h3 className="mt-3 text-2xl font-bold text-[#07152f]">
-                    {formatRupiah(
-                      totalPendapatan
-                    )}
-                  </h3>
-
-                </div>
-
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#eef2f7] text-[#243858]">
-                  <MenuIcon type="report" />
-                </div>
-
-              </div>
-
-              <p className="mt-5 text-xs text-[#98a4b5]">
-                Dari booking dikonfirmasi
-              </p>
-
-            </div>
-
-          </div>
-
-
-          {/* =================================================
-              STATUS
-          ================================================= */}
-
-          <div className="mt-7 grid gap-5 md:grid-cols-3">
 
             {/* PENDING */}
 
-            <div className="rounded-2xl border border-yellow-200 bg-white p-5">
+            <div className="rounded-2xl border border-yellow-200 bg-white p-6 shadow-sm">
 
-              <div className="flex items-center justify-between">
+              <p className="text-sm font-medium text-[#927b4c]">
+                Menunggu
+              </p>
 
-                <div>
+              <p className="mt-3 text-3xl font-bold text-[#07152f]">
+                {pendingBooking}
+              </p>
 
-                  <p className="text-sm font-medium text-[#8a7650]">
-                    Menunggu Konfirmasi
-                  </p>
-
-                  <p className="mt-2 text-2xl font-bold text-[#17243d]">
-                    {pendingBooking}
-                  </p>
-
-                </div>
-
-                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-yellow-50 text-xl">
-                  ⏳
-                </div>
-
-              </div>
+              <p className="mt-3 text-xs text-[#98a4b5]">
+                Perlu dikonfirmasi
+              </p>
 
             </div>
 
 
             {/* CONFIRMED */}
 
-            <div className="rounded-2xl border border-green-200 bg-white p-5">
+            <div className="rounded-2xl border border-green-200 bg-white p-6 shadow-sm">
 
-              <div className="flex items-center justify-between">
+              <p className="text-sm font-medium text-[#66816d]">
+                Dikonfirmasi
+              </p>
 
-                <div>
+              <p className="mt-3 text-3xl font-bold text-[#07152f]">
+                {confirmedBooking}
+              </p>
 
-                  <p className="text-sm font-medium text-[#62816a]">
-                    Pemesanan Berhasil
-                  </p>
-
-                  <p className="mt-2 text-2xl font-bold text-[#17243d]">
-                    {confirmedBooking}
-                  </p>
-
-                </div>
-
-                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-green-50 text-xl">
-                  ✓
-                </div>
-
-              </div>
+              <p className="mt-3 text-xs text-[#98a4b5]">
+                Booking berhasil
+              </p>
 
             </div>
 
 
             {/* CANCELLED */}
 
-            <div className="rounded-2xl border border-red-200 bg-white p-5">
+            <div className="rounded-2xl border border-red-200 bg-white p-6 shadow-sm">
 
-              <div className="flex items-center justify-between">
+              <p className="text-sm font-medium text-[#956c6c]">
+                Dibatalkan
+              </p>
 
-                <div>
+              <p className="mt-3 text-3xl font-bold text-[#07152f]">
+                {cancelledBooking}
+              </p>
 
-                  <p className="text-sm font-medium text-[#956c6c]">
-                    Dibatalkan
-                  </p>
-
-                  <p className="mt-2 text-2xl font-bold text-[#17243d]">
-                    {cancelledBooking}
-                  </p>
-
-                </div>
-
-                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-red-50 text-xl">
-                  ×
-                </div>
-
-              </div>
+              <p className="mt-3 text-xs text-[#98a4b5]">
+                Booking dibatalkan
+              </p>
 
             </div>
 
@@ -899,33 +809,62 @@ export default async function AdminDashboard() {
 
 
           {/* =================================================
-              BOOKING TERBARU
+              PENDAPATAN
           ================================================= */}
 
-          <div className="mt-8 rounded-2xl border border-[#e2e7ee] bg-white shadow-sm">
+          <div className="mt-6 rounded-2xl border border-[#e2e7ee] bg-white p-6 shadow-sm">
 
-            {/* HEADER */}
-
-            <div className="flex flex-col gap-4 border-b border-[#e9edf2] p-6 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 
               <div>
 
-                <p className="text-xs font-medium text-[#8da0bd]">
-                  Aktivitas Terbaru
+                <p className="text-sm font-medium text-[#8392a8]">
+                  Total Pendapatan
                 </p>
 
-                <h3 className="mt-1 text-xl font-bold text-[#07152f]">
-                  Riwayat Pemesanan
+                <h3 className="mt-2 text-3xl font-bold text-[#07152f]">
+                  {formatRupiah(
+                    totalPendapatan
+                  )}
                 </h3>
+
+                <p className="mt-2 text-xs text-[#98a4b5]">
+                  Hanya dari booking yang
+                  sudah dikonfirmasi
+                </p>
 
               </div>
 
+
               <Link
-                href="/admin/booking"
-                className="rounded-xl bg-[#07152f] px-5 py-3 text-center text-sm font-semibold text-white transition hover:bg-[#152849]"
+                href="/admin/laporan"
+                className="rounded-xl bg-[#07152f] px-5 py-3 text-center text-sm font-semibold text-white hover:bg-[#152849]"
               >
-                Lihat Semua
+                Lihat Laporan
               </Link>
+
+            </div>
+
+          </div>
+
+
+          {/* =================================================
+              TABLE
+          ================================================= */}
+
+          <div className="mt-7 overflow-hidden rounded-2xl border border-[#e2e7ee] bg-white shadow-sm">
+
+            {/* TABLE HEADER */}
+
+            <div className="border-b border-[#e8edf2] p-6">
+
+              <h3 className="text-xl font-bold text-[#07152f]">
+                Pemesanan Terdaftar
+              </h3>
+
+              <p className="mt-1 text-sm text-[#8a98ac]">
+                {totalBooking} pemesanan ditemukan
+              </p>
 
             </div>
 
@@ -934,34 +873,38 @@ export default async function AdminDashboard() {
 
             <div className="overflow-x-auto">
 
-              <table className="w-full min-w-[900px]">
+              <table className="w-full min-w-[1250px]">
 
                 <thead>
 
-                  <tr className="border-b border-[#edf0f4] bg-[#fafbfd]">
+                  <tr className="border-b border-[#e9edf2] bg-[#fafbfd]">
 
-                    <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wide text-[#8a98ac]">
+                    <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wide text-[#8997aa]">
                       Customer
                     </th>
 
-                    <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wide text-[#8a98ac]">
+                    <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wide text-[#8997aa]">
                       Lapangan
                     </th>
 
-                    <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wide text-[#8a98ac]">
+                    <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wide text-[#8997aa]">
                       Tanggal
                     </th>
 
-                    <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wide text-[#8a98ac]">
+                    <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wide text-[#8997aa]">
                       Waktu
                     </th>
 
-                    <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wide text-[#8a98ac]">
+                    <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wide text-[#8997aa]">
                       Total
                     </th>
 
-                    <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wide text-[#8a98ac]">
+                    <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wide text-[#8997aa]">
                       Status
+                    </th>
+
+                    <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wide text-[#8997aa]">
+                      Aksi
                     </th>
 
                   </tr>
@@ -971,26 +914,26 @@ export default async function AdminDashboard() {
 
                 <tbody>
 
-                  {bookingTerbaru.length === 0 ? (
+                  {bookings.length === 0 ? (
 
                     <tr>
 
                       <td
-                        colSpan={6}
-                        className="px-6 py-16 text-center"
+                        colSpan={7}
+                        className="px-6 py-20 text-center"
                       >
 
-                        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[#f1f4f8] text-2xl">
+                        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-[#f1f4f8] text-2xl">
                           📅
                         </div>
 
-                        <p className="mt-4 font-semibold text-[#52627a]">
-                          Belum ada pemesanan
-                        </p>
+                        <h3 className="mt-4 font-bold text-[#52627a]">
+                          Belum Ada Pemesanan
+                        </h3>
 
-                        <p className="mt-1 text-sm text-[#9aa6b7]">
-                          Data pemesanan akan muncul
-                          di sini.
+                        <p className="mt-1 text-sm text-[#98a4b5]">
+                          Data pemesanan customer
+                          akan muncul di sini.
                         </p>
 
                       </td>
@@ -999,7 +942,7 @@ export default async function AdminDashboard() {
 
                   ) : (
 
-                    bookingTerbaru.map(
+                    bookings.map(
                       (booking) => {
 
                         const durasi =
@@ -1012,6 +955,7 @@ export default async function AdminDashboard() {
                           booking.lapangan.price *
                           durasi;
 
+
                         return (
 
                           <tr
@@ -1023,16 +967,33 @@ export default async function AdminDashboard() {
 
                             <td className="px-6 py-5">
 
-                              <div>
+                              <div className="flex items-center gap-3">
 
-                                <p className="font-semibold text-[#17243d]">
-                                  {booking.customer.name ||
-                                    booking.customer.username}
-                                </p>
+                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#e9eef5] text-sm font-bold text-[#263b5e]">
 
-                                <p className="mt-1 text-xs text-[#8c99ac]">
-                                  {booking.customer.email}
-                                </p>
+                                  {(
+                                    booking.customer.name ||
+                                    booking.customer.username ||
+                                    "C"
+                                  )
+                                    .charAt(0)
+                                    .toUpperCase()}
+
+                                </div>
+
+
+                                <div>
+
+                                  <p className="font-semibold text-[#17243d]">
+                                    {booking.customer.name ||
+                                      booking.customer.username}
+                                  </p>
+
+                                  <p className="mt-1 text-xs text-[#8d9aab]">
+                                    {booking.customer.email}
+                                  </p>
+
+                                </div>
 
                               </div>
 
@@ -1047,7 +1008,7 @@ export default async function AdminDashboard() {
                                 {booking.lapangan.name}
                               </p>
 
-                              <p className="mt-1 text-xs text-[#8c99ac]">
+                              <p className="mt-1 text-xs text-[#8d9aab]">
                                 {booking.lapangan.location}
                               </p>
 
@@ -1058,7 +1019,7 @@ export default async function AdminDashboard() {
 
                             <td className="px-6 py-5">
 
-                              <p className="text-sm text-[#52627a]">
+                              <p className="text-sm font-medium text-[#52627a]">
                                 {formatTanggal(
                                   booking.startTime
                                 )}
@@ -1071,7 +1032,7 @@ export default async function AdminDashboard() {
 
                             <td className="px-6 py-5">
 
-                              <p className="text-sm font-medium text-[#52627a]">
+                              <p className="text-sm font-semibold text-[#263b5e]">
                                 {formatJam(
                                   booking.startTime
                                 )}
@@ -1081,6 +1042,10 @@ export default async function AdminDashboard() {
                                 )}
                               </p>
 
+                              <p className="mt-1 text-xs text-[#8d9aab]">
+                                {durasi} jam
+                              </p>
+
                             </td>
 
 
@@ -1088,7 +1053,7 @@ export default async function AdminDashboard() {
 
                             <td className="px-6 py-5">
 
-                              <p className="font-semibold text-[#17243d]">
+                              <p className="font-bold text-[#17243d]">
                                 {formatRupiah(
                                   total
                                 )}
@@ -1109,6 +1074,98 @@ export default async function AdminDashboard() {
 
                             </td>
 
+
+                            {/* AKSI */}
+
+                            <td className="px-6 py-5">
+
+                              {booking.status ===
+                              "PENDING" ? (
+
+                                <div className="flex flex-col gap-2">
+
+                                  {/* KONFIRMASI */}
+
+                                  <form
+                                    action={
+                                      updateBookingStatus
+                                    }
+                                  >
+
+                                    <input
+                                      type="hidden"
+                                      name="bookingId"
+                                      value={
+                                        booking.id
+                                      }
+                                    />
+
+                                    <input
+                                      type="hidden"
+                                      name="status"
+                                      value="CONFIRMED"
+                                    />
+
+                                    <button
+                                      type="submit"
+                                      className="w-full rounded-lg bg-green-600 px-4 py-2 text-xs font-bold text-white transition hover:bg-green-700"
+                                    >
+                                      ✓ Konfirmasi
+                                    </button>
+
+                                  </form>
+
+
+                                  {/* BATALKAN */}
+
+                                  <form
+                                    action={
+                                      updateBookingStatus
+                                    }
+                                  >
+
+                                    <input
+                                      type="hidden"
+                                      name="bookingId"
+                                      value={
+                                        booking.id
+                                      }
+                                    />
+
+                                    <input
+                                      type="hidden"
+                                      name="status"
+                                      value="CANCELLED"
+                                    />
+
+                                    <button
+                                      type="submit"
+                                      className="w-full rounded-lg border border-red-200 bg-white px-4 py-2 text-xs font-bold text-red-600 transition hover:bg-red-50"
+                                    >
+                                      × Batalkan
+                                    </button>
+
+                                  </form>
+
+                                </div>
+
+                              ) : booking.status ===
+                                "CONFIRMED" ? (
+
+                                <span className="text-xs font-semibold text-green-600">
+                                  ✓ Sudah dikonfirmasi
+                                </span>
+
+                              ) : (
+
+                                <span className="text-xs font-semibold text-red-500">
+                                  ✕ Pemesanan dibatalkan
+                                </span>
+
+                              )}
+
+                            </td>
+
                           </tr>
 
                         );
@@ -1122,77 +1179,6 @@ export default async function AdminDashboard() {
               </table>
 
             </div>
-
-          </div>
-
-
-          {/* =================================================
-              QUICK MENU
-          ================================================= */}
-
-          <div className="mt-8 grid gap-5 md:grid-cols-3">
-
-            <Link
-              href="/admin/lapangan"
-              className="rounded-2xl border border-[#e2e7ee] bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
-            >
-
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#eef2f7] text-[#243858]">
-                <MenuIcon type="field" />
-              </div>
-
-              <h3 className="mt-5 font-bold text-[#17243d]">
-                Kelola Lapangan
-              </h3>
-
-              <p className="mt-2 text-sm leading-6 text-[#8a98ac]">
-                Tambah, ubah, dan kelola
-                lapangan futsal.
-              </p>
-
-            </Link>
-
-
-            <Link
-              href="/admin/booking"
-              className="rounded-2xl border border-[#e2e7ee] bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
-            >
-
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#eef2f7] text-[#243858]">
-                <MenuIcon type="booking" />
-              </div>
-
-              <h3 className="mt-5 font-bold text-[#17243d]">
-                Kelola Pemesanan
-              </h3>
-
-              <p className="mt-2 text-sm leading-6 text-[#8a98ac]">
-                Lihat dan kelola seluruh
-                pemesanan customer.
-              </p>
-
-            </Link>
-
-
-            <Link
-              href="/admin/customer"
-              className="rounded-2xl border border-[#e2e7ee] bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
-            >
-
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#eef2f7] text-[#243858]">
-                <MenuIcon type="user" />
-              </div>
-
-              <h3 className="mt-5 font-bold text-[#17243d]">
-                Manajemen User
-              </h3>
-
-              <p className="mt-2 text-sm leading-6 text-[#8a98ac]">
-                Lihat data pengguna
-                Lapangin.
-              </p>
-
-            </Link>
 
           </div>
 

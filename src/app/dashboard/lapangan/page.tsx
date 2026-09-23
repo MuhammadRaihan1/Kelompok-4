@@ -264,8 +264,23 @@
                   </span>
                 </a>
 
-              
+                {/* PESAN LAPANGAN */}
+                <a
+                  href="/dashboard/booking"
+                  className="flex items-center gap-3 rounded-xl px-3 py-3 text-slate-400 transition hover:bg-slate-900 hover:text-white"
+                >
+                  <BookingIcon />
+                  <span>Pesan Lapangan</span>
+                </a>
 
+                {/* RIWAYAT */}
+                <a
+                  href="/dashboard/riwayat"
+                  className="flex items-center gap-3 rounded-xl px-3 py-3 text-slate-400 transition hover:bg-slate-900 hover:text-white"
+                >
+                  <HistoryIcon />
+                  <span>Riwayat Pemesanan</span>
+                </a>
                 {/* RIWAYAT */}
 
                 <a
@@ -652,13 +667,12 @@
                           </a>
 
                           {/* BOOKING */}
-
-                          <a
-                            href={`/dashboard/lapangan/${item.id}`}
-                            className="inline-flex h-11 flex-1 items-center justify-center rounded-xl bg-slate-950 text-sm font-semibold text-white transition hover:bg-slate-800"
-                          >
-                            Booking
-                          </a>
+<a
+  href={`/dashboard/booking?lapangan=${item.id}`}
+  className="inline-flex h-11 flex-1 items-center justify-center rounded-xl bg-slate-950 text-sm font-semibold text-white transition hover:bg-slate-800"
+>
+  Booking
+</a>
 
                         </div>
 

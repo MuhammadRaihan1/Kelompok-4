@@ -85,14 +85,13 @@ model Customer {
   email       String  @unique
   name        String?
   username    String  @unique
-  password    String
+  password    String?
   picture_url String?
 
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
   bookings  Booking[]
 }
-
 model Admin {
   id          String  @id @default(uuid())
   userId      String  @unique
