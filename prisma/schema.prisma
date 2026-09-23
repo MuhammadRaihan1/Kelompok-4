@@ -106,20 +106,20 @@ model Admin {
 }
 
 model Lapangan {
-  id          String  @id @default(uuid())
+  id          String    @id @default(uuid())
   name        String
-  category    String  @default("Futsal")
+  category    String    @default("Futsal")
   description String?
   location    String
   price       Float
   picture_url String?
-  isActive    Boolean @default(true)
+  isActive    Boolean   @default(true)
 
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  bookings  Booking[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  bookings    Booking[]
 }
-
 enum StatusBooking {
   PENDING
   CONFIRMED
