@@ -2,6 +2,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { headers as nextHeaders } from "next/headers";
 import { redirect } from "next/navigation";
+import Link from "next/link";
 
 /* =========================================================
    ICONS
@@ -97,7 +98,11 @@ function LocationIcon() {
    PAGE
 ========================================================= */
 
-export default async function LapanganPage() {
+export default async function LapanganPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string }>;
+}) {
   /* =======================================================
      CEK SESSION
   ======================================================= */
@@ -114,6 +119,16 @@ export default async function LapanganPage() {
 
   const user = session.user;
 
+  async function logout() {
+    "use server";
+
+    await auth.api.signOut({
+      headers: await nextHeaders(),
+    });
+
+    redirect("/");
+  }
+
   /* =======================================================
      AMBIL DATA LAPANGAN DARI DATABASE
 
@@ -121,9 +136,22 @@ export default async function LapanganPage() {
      yang ditampilkan kepada Customer.
   ======================================================= */
 
+  const { q } = await searchParams;
+  const keyword = q?.trim() || "";
+
   const lapangan = await prisma.lapangan.findMany({
     where: {
       isActive: true,
+      ...(keyword
+        ? {
+            OR: [
+              { name: { contains: keyword } },
+              { category: { contains: keyword } },
+              { location: { contains: keyword } },
+              { description: { contains: keyword } },
+            ],
+          }
+        : {}),
     },
     orderBy: {
       createdAt: "desc",
@@ -149,222 +177,292 @@ export default async function LapanganPage() {
   return (
     <main className="min-h-screen bg-slate-50 text-slate-900">
       <div className="flex min-h-screen">
-
         {/* =================================================
             SIDEBAR
         ================================================= */}
-
-        <aside className="hidden w-64 shrink-0 flex-col bg-slate-950 text-white lg:flex">
-
-          {/* =================================================
-              LOGO
-          ================================================= */}
-
-          <div className="flex items-center gap-3 border-b border-slate-800 px-6 py-6">
-
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-lg font-bold text-slate-950">
-              L
-            </div>
-
+        <aside className="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:z-30 lg:flex lg:h-screen w-64 flex-col bg-slate-950 text-white">
+          {/* LOGO */}
+          <div className="flex items-center gap-3 px-6 py-6 border-b border-slate-800">
+            <img
+              src="/logo2.jpg"
+              alt="Logo Lapangan"
+              className="w-10 h-10 rounded-xl object-contain bg-white"
+            />
             <div>
               <h1 className="text-lg font-bold tracking-tight">
                 Lapangin
               </h1>
-
               <p className="text-xs text-slate-500">
                 Booking Lapangan
               </p>
             </div>
-
           </div>
 
-          {/* =================================================
-              NAVIGATION
-          ================================================= */}
-
+          {/* NAVIGATION */}
           <nav className="flex-1 px-4 py-6">
-
-            <p className="mb-3 px-3 text-xs font-semibold uppercase tracking-wider text-slate-500">
-              Menu Utama
-            </p>
-
             <div className="space-y-1">
 
               {/* DASHBOARD */}
-
               <a
                 href="/dashboard"
-                className="flex items-center gap-3 rounded-xl px-3 py-3 text-slate-400 transition hover:bg-slate-900 hover:text-white"
+                className="flex items-center gap-3 px-3 py-3 rounded-xl text-slate-400 hover:bg-slate-900 hover:text-white transition"
               >
-                <DashboardIcon />
-
-                <span>
-                  Dashboard
-                </span>
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                >
+                  <rect
+                    x="3"
+                    y="3"
+                    width="7"
+                    height="7"
+                    rx="1"
+                  />
+                  <rect
+                    x="14"
+                    y="3"
+                    width="7"
+                    height="7"
+                    rx="1"
+                  />
+                  <rect
+                    x="3"
+                    y="14"
+                    width="7"
+                    height="7"
+                    rx="1"
+                  />
+                  <rect
+                    x="14"
+                    y="14"
+                    width="7"
+                    height="7"
+                    rx="1"
+                  />
+                </svg>
+                Dashboard
               </a>
 
               {/* LAPANGAN */}
 
-              <a
+              <Link
                 href="/dashboard/lapangan"
-                className="flex items-center gap-3 rounded-xl bg-slate-800 px-3 py-3 font-medium text-white"
+                className="flex items-center gap-3 px-3 py-3 rounded-xl bg-slate-800 text-white font-medium"
               >
-                <FieldIcon />
-
-                <span>
-                  Lapangan
-                </span>
-              </a>
-
-              {/* PESAN LAPANGAN */}
-
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                >
+                  <rect
+                    x="3"
+                    y="4"
+                    width="18"
+                    height="16"
+                    rx="2"
+                  />
+                  <path d="M3 12h18" />
+                  <path d="M12 4v16" />
+                  <circle
+                    cx="12"
+                    cy="12"
+                    r="2"
+                  />
+                </svg>
+                Lapangan
+              </Link>
+              {/* BOOKING */}
               <a
                 href="/dashboard/booking"
-                className="flex items-center gap-3 rounded-xl px-3 py-3 text-slate-400 transition hover:bg-slate-900 hover:text-white"
+                className="flex items-center gap-3 px-3 py-3 rounded-xl text-slate-400 hover:bg-slate-900 hover:text-white transition"
               >
-                <BookingIcon />
-
-                <span>
-                  Pesan Lapangan
-                </span>
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                >
+                  <rect
+                    x="3"
+                    y="4"
+                    width="18"
+                    height="17"
+                    rx="2"
+                  />
+                  <path d="M16 2v4" />
+                  <path d="M8 2v4" />
+                  <path d="M3 10h18" />
+                  <path d="M8 14h3" />
+                  <path d="M8 17h6" />
+                </svg>
+                Pesan Lapangan
               </a>
 
               {/* RIWAYAT */}
-
               <a
                 href="/dashboard/riwayat"
-                className="flex items-center gap-3 rounded-xl px-3 py-3 text-slate-400 transition hover:bg-slate-900 hover:text-white"
+                className="flex items-center gap-3 px-3 py-3 rounded-xl text-slate-400 hover:bg-slate-900 hover:text-white transition"
               >
-                <HistoryIcon />
-
-                <span>
-                  Riwayat Pemesanan
-                </span>
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                >
+                  <circle
+                    cx="12"
+                    cy="12"
+                    r="9"
+                  />
+                  <path d="M12 7v5l3 2" />
+                </svg>
+                Riwayat Pemesanan
               </a>
-
             </div>
-
           </nav>
 
-          {/* =================================================
-              USER SIDEBAR
-          ================================================= */}
+          {/* USER SIDEBAR */}
 
-          <div className="border-t border-slate-800 p-4">
-
-            <div className="flex items-center gap-3 rounded-xl bg-slate-900 p-3">
-
-              {user.image ? (
-                <img
-                  src={user.image}
-                  alt={user.name || "User"}
-                  className="h-10 w-10 shrink-0 rounded-full object-cover"
-                />
-              ) : (
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-slate-700 font-semibold">
-                  {user.name?.charAt(0).toUpperCase() || "U"}
-                </div>
-              )}
-
-              <div className="min-w-0">
-
-                <p className="truncate text-sm font-semibold text-white">
-                  {user.name || "Customer"}
-                </p>
-
-                <p className="truncate text-xs text-slate-500">
-                  {user.email}
-                </p>
-
-              </div>
-
-            </div>
-
+          <div className="p-4 border-t border-slate-800 text-center">
+            <p className="text-xs text-slate-500">
+              © {new Date().getFullYear()} Lapangin. Semua hak dilindungi.
+            </p>
           </div>
-
         </aside>
-
         {/* =================================================
             MAIN AREA
         ================================================= */}
 
-        <div className="min-w-0 flex-1">
+        <div className="flex-2 min-w-0 lg:ml-64">
 
           {/* =================================================
               TOPBAR
           ================================================= */}
 
           <header className="flex h-20 items-center justify-between border-b border-slate-200 bg-white px-5 md:px-8">
-
             {/* MOBILE LOGO */}
-
             <div className="flex items-center gap-3 lg:hidden">
-
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-slate-950 font-bold text-white">
-                L
-              </div>
-
+             <img
+                src="/logo2.jpg"
+                alt="Logo Lapangan"
+                className="w-10 h-10 rounded-xl object-contain bg-white"
+              />
               <span className="font-bold">
                 Lapangin
               </span>
-
             </div>
-
             {/* BREADCRUMB */}
-
-            <div className="hidden items-center gap-2 text-sm md:flex">
-
-              <a
-                href="/dashboard"
-                className="text-slate-400 transition hover:text-slate-700"
-              >
-                Dashboard
-              </a>
-
-              <span className="text-slate-300">
-                /
-              </span>
-
-              <span className="font-medium text-slate-700">
-                Lapangan
-              </span>
-
-            </div>
-
-            {/* USER HEADER */}
-
-            <div className="ml-auto flex items-center gap-3">
-
-              <div className="hidden text-right sm:block">
-
-                <p className="text-sm font-semibold text-slate-900">
-                  {user.name || "Customer"}
-                </p>
-
-                <p className="text-xs text-slate-500">
-                  Pelanggan
-                </p>
-
+            <div className="hidden w-full items-center justify-between text-sm md:flex">
+              <div className="flex items-center gap-2">
+                <a
+                  href="/dashboard"
+                  className="text-slate-400 transition hover:text-slate-700"
+                >
+                  Dashboard
+                </a>
+                <span className="text-slate-300">
+                  /
+                </span>
+                <span className="font-medium text-slate-700">
+                  Lapangan
+                </span>
               </div>
 
-              {user.image ? (
-
-                <img
-                  src={user.image}
-                  alt={user.name || "User"}
-                  className="h-10 w-10 rounded-full border border-slate-200 object-cover"
-                />
-
-              ) : (
-
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-200 font-semibold text-slate-700">
-                  {user.name?.charAt(0).toUpperCase() || "U"}
+              <div className="flex items-center gap-2">
+              <details className="relative shrink-0">
+                <summary
+                  aria-label="Notifikasi"
+                  className="relative flex h-10 w-10 cursor-pointer list-none items-center justify-center rounded-xl text-slate-600 transition hover:bg-slate-100 hover:text-slate-950 [&::-webkit-details-marker]:hidden"
+                >
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9" />
+                    <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+                  </svg>
+                  <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-red-500" />
+                </summary>
+                <div className="absolute right-0 z-20 mt-3 w-80 rounded-2xl border border-slate-200 bg-white p-4 text-left shadow-xl">
+                  <div className="flex items-center justify-between">
+                    <h2 className="font-semibold text-slate-950">Notifikasi</h2>
+                    <span className="rounded-full bg-red-100 px-2 py-1 text-xs font-medium text-red-600">Baru</span>
+                  </div>
+                  <div className="mt-3 rounded-xl bg-slate-50 p-3">
+                    <p className="text-sm font-medium text-slate-900">Pesan terbaru</p>
+                    <p className="mt-1 text-xs leading-relaxed text-slate-500">
+                      Booking Anda telah diterima. Silakan cek detail pemesanan untuk melihat status dan bukti pembayaran.
+                    </p>
+                  </div>
                 </div>
+              </details>
+              <details className="relative shrink-0">
+                <summary className="flex cursor-pointer list-none items-center gap-3 rounded-xl p-1 hover:bg-slate-100 [&::-webkit-details-marker]:hidden">
+                  <div className="hidden sm:block text-right">
+                    <p className="text-sm font-semibold">
+                      {user.name || "Pelanggan"}
+                    </p>
+                    <p className="text-xs text-slate-500">
+                      Pelanggan
+                    </p>
+                  </div>
 
-              )}
+                  {user.image ? (
+                    <img
+                      src={user.image}
+                      alt={user.name || "User"}
+                      className="w-10 h-10 rounded-full object-cover border border-slate-200"
+                    />
+                  ) : (
+                    <div className="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center font-semibold">
+                      {user.name
+                        ?.charAt(0)
+                        .toUpperCase() || "U"}
+                    </div>
+                  )}
+                </summary>
 
+                <div className="absolute right-0 top-14 z-20 w-64 rounded-xl border border-slate-200 bg-white p-4 shadow-lg">
+                  <p className="text-sm font-semibold text-slate-950">
+                    {user.name || "Pelanggan"}
+                  </p>
+                  <p className="mt-1 text-xs text-slate-500">
+                    {user.email}
+                  </p>
+                  <div className="mt-3 flex items-center gap-2 text-sm text-emerald-600">
+                    <span className="h-2 w-2 rounded-full bg-emerald-500" />
+                    Status: Pelanggan
+                  </div>
+                  <form action={logout} className="mt-4 border-t border-slate-100 pt-3">
+                    <button
+                      type="submit"
+                      className="w-full rounded-lg bg-slate-950 px-3 py-2 text-sm font-semibold text-white transition hover:bg-slate-800"
+                    >
+                      Keluar
+                    </button>
+                  </form>
+                </div>
+              </details>
+              </div>
             </div>
-
           </header>
 
           {/* =================================================
@@ -378,47 +476,51 @@ export default async function LapanganPage() {
             ================================================= */}
 
             <div className="mb-8">
-
               <p className="mb-2 text-sm font-medium text-slate-500">
                 Lapangan
               </p>
-
               <h1 className="text-3xl font-bold tracking-tight text-slate-950 md:text-4xl">
                 Pilih Lapangan
               </h1>
-
               <p className="mt-2 text-slate-500">
                 Cari lapangan, cek ketersediaan, dan pilih jadwal bermainmu.
               </p>
 
+              
             </div>
 
             {/* =================================================
                 LIST HEADER
             ================================================= */}
-
             <div className="mb-5 flex items-center justify-between">
-
               <div>
-
                 <h2 className="text-lg font-bold text-slate-900">
                   Daftar Lapangan
                 </h2>
-
                 <p className="mt-1 text-sm text-slate-500">
                   {lapangan.length} lapangan tersedia
+                  {keyword && ` untuk "${keyword}"`}
                 </p>
-
               </div>
 
               <div className="hidden items-center gap-2 text-sm text-slate-500 sm:flex">
-
-                <div className="h-2.5 w-2.5 rounded-full bg-emerald-500" />
-
-                Tersedia
-
+              <form method="get" className="ml-auto mt-4 flex max-w-5xl gap-1">
+                <input
+                  type="search"
+                  name="q"
+                  defaultValue={keyword}
+                  placeholder="Cari nama, kategori, lokasi, atau deskripsi..."
+                  aria-label="Cari lapangan"
+                  className="h-11 min-w-0 flex-1 rounded-xl border border-slate-200 bg-white px-4 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+                />
+                <button
+                  type="submit"
+                  className="h-11 rounded-xl bg-slate-950 px-5 text-sm font-semibold text-white transition hover:bg-slate-800"
+                >
+                  Cari
+                </button>
+              </form>
               </div>
-
             </div>
 
             {/* =================================================
@@ -428,21 +530,17 @@ export default async function LapanganPage() {
             {lapangan.length === 0 ? (
 
               <div className="rounded-2xl border border-slate-200 bg-white px-5 py-16 text-center shadow-sm">
-
                 <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-100 text-slate-400">
                   <FieldIcon />
                 </div>
-
                 <h3 className="mt-5 text-lg font-bold text-slate-800">
-                  Belum Ada Lapangan
+                  {keyword ? "Lapangan Tidak Ditemukan" : "Belum Ada Lapangan"}
                 </h3>
-
                 <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-400">
-                  Saat ini belum ada lapangan aktif yang tersedia.
-                  Lapangan yang ditambahkan oleh Admin akan muncul
-                  otomatis di halaman ini.
+                  {keyword
+                    ? "Tidak ada lapangan yang sesuai dengan pencarian. Coba gunakan kata kunci lain."
+                    : "Saat ini belum ada lapangan aktif yang tersedia. Lapangan yang ditambahkan oleh Admin akan muncul otomatis di halaman ini."}
                 </p>
-
               </div>
 
             ) : (
@@ -452,89 +550,58 @@ export default async function LapanganPage() {
               ================================================= */
 
               <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
-
                 {lapangan.map((item) => (
-
                   <div
                     key={item.id}
                     className="group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition duration-200 hover:-translate-y-0.5 hover:shadow-md"
                   >
-
                     {/* =================================================
                         COVER / GAMBAR LAPANGAN
                     ================================================= */}
-
                     <div className="relative h-48 overflow-hidden bg-gradient-to-br from-slate-100 to-slate-200">
-
                       {/* =================================================
                           JIKA ADA GAMBAR DARI ADMIN
                       ================================================= */}
-
                       {item.picture_url ? (
-
                         <img
                           src={item.picture_url}
                           alt={item.name}
                           className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
                         />
-
                       ) : (
-
                         /* =================================================
                            JIKA BELUM ADA GAMBAR
                         ================================================= */
-
                         <div className="flex h-full items-center justify-center">
-
                           <div className="text-7xl transition duration-300 group-hover:scale-110">
-
                             {item.category === "Futsal" && "⚽"}
-
                             {item.category === "Badminton" && "🏸"}
-
                             {item.category === "Basket" && "🏀"}
-
                             {item.category === "Volleyball" && "🏐"}
-
                             {![
                               "Futsal",
                               "Badminton",
                               "Basket",
                               "Volleyball",
                             ].includes(item.category) && "🏟️"}
-
                           </div>
-
                         </div>
-
                       )}
-
                       {/* =================================================
                           CATEGORY
                       ================================================= */}
-
                       <div className="absolute left-4 top-4">
-
                         <span className="inline-flex rounded-lg bg-white/95 px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-sm backdrop-blur">
-
                           {item.category}
-
                         </span>
-
                       </div>
-
                       {/* =================================================
                           STATUS
                       ================================================= */}
-
                       <div className="absolute right-4 top-4">
-
                         <span className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-100 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700">
-
                           <span className="h-2 w-2 rounded-full bg-emerald-500" />
-
                           Tersedia
-
                         </span>
 
                       </div>

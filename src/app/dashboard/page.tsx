@@ -2,6 +2,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { headers as nextHeaders } from "next/headers";
 import { redirect } from "next/navigation";
+import Link from "next/link";
 
 /* =========================================================
    HELPER
@@ -79,6 +80,16 @@ export default async function DashboardPage() {
 
   const user = session.user;
 
+  async function logout() {
+    "use server";
+
+    await auth.api.signOut({
+      headers: await nextHeaders(),
+    });
+
+    redirect("/");
+  }
+
   /* =======================================================
      CUSTOMER
   ======================================================= */
@@ -101,14 +112,6 @@ export default async function DashboardPage() {
 
         include: {
           lapangan: true,
-
-          payments: {
-            orderBy: {
-              createdAt: "desc",
-            },
-
-            take: 1,
-          },
         },
 
         orderBy: {
@@ -243,49 +246,38 @@ export default async function DashboardPage() {
      BOOKING TERBARU
   ======================================================= */
 
-  const bookingTerbaru =
-    bookings.slice(0, 5);
+  const bookingTerbaru = bookings.slice(0, 5);
 
   return (
     <main className="min-h-screen bg-slate-50 text-slate-900">
       <div className="flex min-h-screen">
-
         {/* =================================================
             SIDEBAR
         ================================================= */}
-
-        <aside className="hidden lg:flex w-64 flex-col bg-slate-950 text-white">
+        <aside className="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:z-30 lg:flex lg:h-screen w-64 flex-col bg-slate-950 text-white">
 
           {/* LOGO */}
           <div className="flex items-center gap-3 px-6 py-6 border-b border-slate-800">
-
-            <div className="w-10 h-10 rounded-xl bg-white text-slate-950 flex items-center justify-center font-bold text-lg">
-              L
-            </div>
-
+            <img
+              src="/logo2.jpg"
+              alt="Logo Lapangan"
+              className="w-10 h-10 rounded-xl object-contain bg-white"
+            />
             <div>
               <h1 className="text-lg font-bold tracking-tight">
-                Lapangan
+                Lapangin
               </h1>
-
               <p className="text-xs text-slate-500">
                 Booking Lapangan
               </p>
             </div>
-
           </div>
 
           {/* NAVIGATION */}
           <nav className="flex-1 px-4 py-6">
-
-            <p className="px-3 mb-3 text-xs font-semibold uppercase tracking-wider text-slate-500">
-              Menu Utama
-            </p>
-
             <div className="space-y-1">
 
               {/* DASHBOARD */}
-
               <a
                 href="/dashboard"
                 className="flex items-center gap-3 px-3 py-3 rounded-xl bg-slate-800 text-white font-medium"
@@ -327,13 +319,12 @@ export default async function DashboardPage() {
                     rx="1"
                   />
                 </svg>
-
                 Dashboard
               </a>
 
               {/* LAPANGAN */}
 
-              <a
+              <Link
                 href="/dashboard/lapangan"
                 className="flex items-center gap-3 px-3 py-3 rounded-xl text-slate-400 hover:bg-slate-900 hover:text-white transition"
               >
@@ -352,23 +343,17 @@ export default async function DashboardPage() {
                     height="16"
                     rx="2"
                   />
-
                   <path d="M3 12h18" />
-
                   <path d="M12 4v16" />
-
                   <circle
                     cx="12"
                     cy="12"
                     r="2"
                   />
                 </svg>
-
                 Lapangan
-              </a>
-
+              </Link>
               {/* BOOKING */}
-
               <a
                 href="/dashboard/booking"
                 className="flex items-center gap-3 px-3 py-3 rounded-xl text-slate-400 hover:bg-slate-900 hover:text-white transition"
@@ -388,23 +373,16 @@ export default async function DashboardPage() {
                     height="17"
                     rx="2"
                   />
-
                   <path d="M16 2v4" />
-
                   <path d="M8 2v4" />
-
                   <path d="M3 10h18" />
-
                   <path d="M8 14h3" />
-
                   <path d="M8 17h6" />
                 </svg>
-
                 Pesan Lapangan
               </a>
 
               {/* RIWAYAT */}
-
               <a
                 href="/dashboard/riwayat"
                 className="flex items-center gap-3 px-3 py-3 rounded-xl text-slate-400 hover:bg-slate-900 hover:text-white transition"
@@ -422,143 +400,138 @@ export default async function DashboardPage() {
                     cy="12"
                     r="9"
                   />
-
                   <path d="M12 7v5l3 2" />
                 </svg>
-
                 Riwayat Pemesanan
               </a>
-
             </div>
           </nav>
 
           {/* USER SIDEBAR */}
 
-          <div className="p-4 border-t border-slate-800">
-
-            <div className="flex items-center gap-3 p-3 rounded-xl bg-slate-900">
-
-              {user.image ? (
-                <img
-                  src={user.image}
-                  alt={user.name || "User"}
-                  className="w-10 h-10 rounded-full object-cover"
-                />
-              ) : (
-                <div className="w-10 h-10 rounded-full bg-slate-700 flex items-center justify-center font-semibold">
-                  {user.name
-                    ?.charAt(0)
-                    .toUpperCase() || "U"}
-                </div>
-              )}
-
-              <div className="min-w-0">
-
-                <p className="text-sm font-semibold truncate">
-                  {user.name || "Pelanggan"}
-                </p>
-
-                <p className="text-xs text-slate-500 truncate">
-                  {user.email}
-                </p>
-
-              </div>
-
-            </div>
+          <div className="p-4 border-t border-slate-800 text-center">
+            <p className="text-xs text-slate-500">
+              © {new Date().getFullYear()} Lapangin. Semua hak dilindungi.
+            </p>
           </div>
-
         </aside>
 
         {/* =================================================
             MAIN
         ================================================= */}
 
-        <div className="flex-1 min-w-0">
+        <div className="flex-1 min-w-0 lg:ml-64">
 
           {/* TOPBAR */}
-
           <header className="h-20 bg-white border-b border-slate-200 flex items-center justify-between px-5 md:px-8">
-
             {/* MOBILE LOGO */}
-
             <div className="flex items-center gap-3 lg:hidden">
-
-              <div className="w-9 h-9 rounded-lg bg-slate-950 text-white flex items-center justify-center font-bold">
-                L
-              </div>
-
+              <img
+                src="/logo2.jpg"
+                alt="Logo Lapangan"
+                className="w-10 h-10 rounded-xl object-contain bg-white"
+              />
               <span className="font-bold">
-                Lapangan
+                Lapangin
               </span>
-
             </div>
-
-            {/* SEARCH */}
-
-            <div className="hidden md:flex items-center w-80">
-
-              <div className="relative w-full">
-
-                <svg
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
-                  width="18"
-                  height="18"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                >
-                  <circle
-                    cx="11"
-                    cy="11"
-                    r="7"
-                  />
-
-                  <path d="m20 20-4-4" />
-                </svg>
-
-                <input
-                  type="text"
-                  placeholder="Cari lapangan..."
-                  className="w-full h-10 pl-10 pr-4 rounded-lg bg-slate-50 border border-slate-200 text-sm outline-none focus:border-slate-400"
-                />
-
-              </div>
-
-            </div>
-
             {/* USER TOPBAR */}
-
-            <div className="flex items-center gap-3 ml-auto">
-
-              <div className="hidden sm:block text-right">
-
-                <p className="text-sm font-semibold">
-                  {user.name || "Pelanggan"}
-                </p>
-
-                <p className="text-xs text-slate-500">
-                  Pelanggan
-                </p>
-
-              </div>
-
-              {user.image ? (
-                <img
-                  src={user.image}
-                  alt={user.name || "User"}
-                  className="w-10 h-10 rounded-full object-cover border border-slate-200"
-                />
-              ) : (
-                <div className="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center font-semibold">
+            <div className="ml-auto flex flex-1 items-center justify-between gap-3">
+               <div>
+                <h1 className="text-1xl md:text-2xl font-bold tracking-tight text-slate-950">
+                  Selamat datang,{" "}
                   {user.name
-                    ?.charAt(0)
-                    .toUpperCase() || "U"}
+                    ?.split(" ")[0] ||
+                    "Pelanggan"}{" "}
+                  👋
+                </h1>
+                <p className="mt-2 text-slate-500">
+                  Booking dan lakukan pemesanan lapangan dengan mudah.
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+              <details className="relative shrink-0">
+                <summary
+                  aria-label="Notifikasi"
+                  className="relative flex h-10 w-10 cursor-pointer list-none items-center justify-center rounded-xl text-slate-600 transition hover:bg-slate-100 hover:text-slate-950 [&::-webkit-details-marker]:hidden"
+                >
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9" />
+                    <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+                  </svg>
+                  <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-red-500" />
+                </summary>
+                <div className="absolute right-0 z-20 mt-3 w-80 rounded-2xl border border-slate-200 bg-white p-4 text-left shadow-xl">
+                  <div className="flex items-center justify-between">
+                    <h2 className="font-semibold text-slate-950">Notifikasi</h2>
+                    <span className="rounded-full bg-red-100 px-2 py-1 text-xs font-medium text-red-600">Baru</span>
+                  </div>
+                  <div className="mt-3 rounded-xl bg-slate-50 p-3">
+                    <p className="text-sm font-medium text-slate-900">Pesan terbaru</p>
+                    <p className="mt-1 text-xs leading-relaxed text-slate-500">
+                      Booking Anda telah diterima. Silakan cek detail pemesanan untuk melihat status dan bukti pembayaran.
+                    </p>
+                  </div>
                 </div>
-              )}
+              </details>
+              <details className="relative shrink-0">
+                <summary className="flex cursor-pointer list-none items-center gap-3 rounded-xl p-1 hover:bg-slate-100 [&::-webkit-details-marker]:hidden">
+                  <div className="hidden sm:block text-right">
+                    <p className="text-sm font-semibold">
+                      {user.name || "Pelanggan"}
+                    </p>
+                    <p className="text-xs text-slate-500">
+                      Pelanggan
+                    </p>
+                  </div>
+                     {user.image ? (
+                    <img
+                      src={user.image}
+                      alt={user.name || "User"}
+                      className="w-10 h-10 rounded-full object-cover border border-slate-200"
+                    />
+                  ) : (
+                    <div className="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center font-semibold">
+                      {user.name
+                        ?.charAt(0)
+                        .toUpperCase() || "U"}
+                    </div>
+                  )}
+                </summary>
 
+                <div className="absolute right-0 top-14 z-20 w-64 rounded-xl border border-slate-200 bg-white p-4 shadow-lg">
+                  <p className="text-sm font-semibold text-slate-950">
+                    {user.name || "Pelanggan"}
+                  </p>
+                  <p className="mt-1 text-xs text-slate-500">
+                    {user.email}
+                  </p>
+                  <div className="mt-3 flex items-center gap-2 text-sm text-emerald-600">
+                    <span className="h-2 w-2 rounded-full bg-emerald-500" />
+                    Status: Pelanggan
+                  </div>
+                  <form action={logout} className="mt-4 border-t border-slate-100 pt-3">
+                    <button
+                      type="submit"
+                      className="w-full rounded-lg bg-slate-950 px-3 py-2 text-sm font-semibold text-white transition hover:bg-slate-800"
+                    >
+                      Keluar
+                    </button>
+                  </form>
+                </div>
+              </details>
+              </div>
             </div>
-
           </header>
 
           {/* =================================================
@@ -570,31 +543,9 @@ export default async function DashboardPage() {
             {/* HEADING */}
 
             <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-5 mb-8">
-
-              <div>
-
-                <p className="text-sm font-medium text-slate-500 mb-2">
-                  Dashboard
-                </p>
-
-                <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-slate-950">
-                  Selamat datang,{" "}
-                  {user.name
-                    ?.split(" ")[0] ||
-                    "Pelanggan"}{" "}
-                  👋
-                </h1>
-
-                <p className="mt-2 text-slate-500">
-                  Kelola pemesanan dan pantau penggunaan
-                  lapanganmu.
-                </p>
-
-              </div>
-
-              <a
+              <Link
                 href="/dashboard/lapangan"
-                className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-slate-950 text-white font-semibold hover:bg-slate-800 transition"
+                className="md:ml-auto inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-slate-950 text-white font-semibold hover:bg-slate-800 transition"
               >
                 <svg
                   width="18"
@@ -607,42 +558,30 @@ export default async function DashboardPage() {
                   <path d="M12 5v14" />
                   <path d="M5 12h14" />
                 </svg>
-
                 Pesan Lapangan
-              </a>
-
+              </Link>
             </div>
 
             {/* =================================================
                 STATISTICS
             ================================================= */}
-
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5 mb-8">
 
               {/* TOTAL PEMESANAN */}
-
               <div className="bg-white border border-slate-200 rounded-2xl p-5">
-
                 <div className="flex items-start justify-between">
-
                   <div>
-
                     <p className="text-sm font-medium text-slate-500">
                       Total Pemesanan
                     </p>
-
                     <h2 className="text-3xl font-bold mt-3">
                       {totalPemesanan}
                     </h2>
-
                     <p className="text-xs text-slate-400 mt-2">
                       Semua pemesanan
                     </p>
-
                   </div>
-
                   <div className="w-11 h-11 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
-
                     <svg
                       width="21"
                       height="21"
@@ -658,44 +597,30 @@ export default async function DashboardPage() {
                         height="17"
                         rx="2"
                       />
-
                       <path d="M16 2v4" />
-
                       <path d="M8 2v4" />
-
                       <path d="M3 10h18" />
                     </svg>
-
                   </div>
-
                 </div>
-
               </div>
 
               {/* BOOKING AKTIF */}
 
               <div className="bg-white border border-slate-200 rounded-2xl p-5">
-
                 <div className="flex items-start justify-between">
-
                   <div>
-
                     <p className="text-sm font-medium text-slate-500">
                       Booking Aktif
                     </p>
-
                     <h2 className="text-3xl font-bold mt-3">
                       {bookingAktif}
                     </h2>
-
                     <p className="text-xs text-slate-400 mt-2">
                       Sudah dikonfirmasi admin
                     </p>
-
                   </div>
-
                   <div className="w-11 h-11 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
-
                     <svg
                       width="21"
                       height="21"
@@ -709,40 +634,29 @@ export default async function DashboardPage() {
                         cy="12"
                         r="9"
                       />
-
                       <path d="m8 12 2.5 2.5L16 9" />
                     </svg>
-
                   </div>
-
                 </div>
-
               </div>
 
               {/* DURASI */}
 
               <div className="bg-white border border-slate-200 rounded-2xl p-5">
-
                 <div className="flex items-start justify-between">
-
                   <div>
-
                     <p className="text-sm font-medium text-slate-500">
                       Durasi Pemakaian
                     </p>
-
                     <h2 className="text-3xl font-bold mt-3">
                       {durasiText}
                     </h2>
-
                     <p className="text-xs text-slate-400 mt-2">
                       Total booking dikonfirmasi
                     </p>
-
                   </div>
 
                   <div className="w-11 h-11 rounded-xl bg-violet-50 text-violet-600 flex items-center justify-center">
-
                     <svg
                       width="21"
                       height="21"
@@ -756,40 +670,28 @@ export default async function DashboardPage() {
                         cy="12"
                         r="9"
                       />
-
                       <path d="M12 7v5l3 2" />
                     </svg>
-
                   </div>
-
                 </div>
-
               </div>
 
               {/* PEMBAYARAN */}
 
               <div className="bg-white border border-slate-200 rounded-2xl p-5">
-
                 <div className="flex items-start justify-between">
-
                   <div>
-
                     <p className="text-sm font-medium text-slate-500">
                       Pembayaran
                     </p>
-
                     <h2 className="text-3xl font-bold mt-3">
                       {menungguPembayaran}
                     </h2>
-
                     <p className="text-xs text-slate-400 mt-2">
                       Menunggu konfirmasi admin
                     </p>
-
                   </div>
-
                   <div className="w-11 h-11 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
-
                     <svg
                       width="21"
                       height="21"
@@ -805,56 +707,47 @@ export default async function DashboardPage() {
                         height="14"
                         rx="2"
                       />
-
                       <path d="M3 10h18" />
-
                       <path d="M7 15h4" />
                     </svg>
-
                   </div>
-
                 </div>
-
               </div>
-
             </div>
 
             {/* =================================================
                 BANNER
             ================================================= */}
 
-            <div className="bg-slate-950 rounded-2xl p-6 md:p-8 text-white mb-8 relative overflow-hidden">
-
+            <div
+              className="bg-slate-950 bg-cover bg-center rounded-2xl p-6 md:p-8 text-white mb-8 relative overflow-hidden"
+              style={{
+                backgroundImage:
+                  "url('/lapangan.jpeg')",
+              }}
+            >
+              <div className="absolute inset-0 bg-slate-950/70" />
               <div className="absolute -right-20 -top-24 w-72 h-72 rounded-full bg-slate-800 opacity-60" />
-
               <div className="absolute right-20 -bottom-32 w-72 h-72 rounded-full bg-slate-800 opacity-40" />
-
               <div className="relative z-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-
                 <div className="max-w-2xl">
-
                   <span className="inline-flex items-center rounded-full bg-white/10 px-3 py-1 text-xs font-medium text-slate-300 mb-4">
                     ⚡ Booking lebih mudah
                   </span>
-
                   <h2 className="text-2xl md:text-3xl font-bold">
                     Cari dan pesan lapangan
                   </h2>
-
                   <p className="mt-2 text-slate-400">
                     Cek ketersediaan lapangan, pilih
                     jadwal, kemudian lakukan pemesanan
                     dengan mudah.
                   </p>
-
                 </div>
-
-                <a
+                <Link
                   href="/dashboard/lapangan"
                   className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-white text-slate-950 font-semibold hover:bg-slate-100 transition whitespace-nowrap"
                 >
                   Lihat Lapangan
-
                   <svg
                     width="18"
                     height="18"
@@ -866,9 +759,7 @@ export default async function DashboardPage() {
                     <path d="M5 12h14" />
                     <path d="m13 6 6 6-6 6" />
                   </svg>
-
-                </a>
-
+                </Link>
               </div>
             </div>
 
@@ -883,19 +774,14 @@ export default async function DashboardPage() {
               ================================================= */}
 
               <div className="xl:col-span-2 bg-white border border-slate-200 rounded-2xl">
-
                 <div className="flex items-center justify-between p-6 border-b border-slate-200">
-
                   <div>
-
                     <h3 className="text-lg font-bold">
                       Riwayat Pemesanan
                     </h3>
-
                     <p className="text-sm text-slate-500 mt-1">
                       Daftar pemesanan lapangan terbaru
                     </p>
-
                   </div>
 
                   <a
@@ -904,42 +790,33 @@ export default async function DashboardPage() {
                   >
                     Lihat semua
                   </a>
-
                 </div>
 
                 {/* ADA BOOKING */}
 
                 {bookingTerbaru.length > 0 ? (
-
                   <div className="divide-y divide-slate-100">
-
                     {bookingTerbaru.map(
                       (booking) => {
-
                         const durasi =
                           hitungDurasi(
                             booking.startTime,
                             booking.endTime
                           );
-
                         const totalHarga =
                           booking.lapangan.price *
                           durasi.totalJam;
-
                         return (
                           <div
                             key={booking.id}
                             className="p-5 hover:bg-slate-50 transition"
                           >
-
                             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
 
                               {/* INFO */}
 
                               <div className="flex items-center gap-4">
-
                                 <div className="w-14 h-14 shrink-0 rounded-xl bg-slate-100 overflow-hidden flex items-center justify-center">
-
                                   {booking
                                     .lapangan
                                     .picture_url ? (
@@ -1086,13 +963,6 @@ export default async function DashboardPage() {
                       sekarang.
                     </p>
 
-                    <a
-                      href="/dashboard/lapangan"
-                      className="inline-flex mt-5 px-4 py-2.5 rounded-lg bg-slate-950 text-white text-sm font-semibold hover:bg-slate-800 transition"
-                    >
-                      Cari Lapangan
-                    </a>
-
                   </div>
 
                 )}
@@ -1183,7 +1053,7 @@ export default async function DashboardPage() {
 
                     <p className="text-sm text-slate-500">
                       {durasiBulanIni > 0
-                        ? `${durasiBulanIni} jam penggunaan bulan ini.`
+                        ? `${durasiBulanIni.toFixed(1)} jam penggunaan bulan ini.`
                         : "Belum ada data penggunaan bulan ini."}
                     </p>
 

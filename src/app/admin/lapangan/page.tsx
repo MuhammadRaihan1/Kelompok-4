@@ -1,6 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import Link from "next/link";
+
 
 /* =========================================================
    TYPE
@@ -208,6 +210,109 @@ function ImageIcon() {
     </svg>
   );
 }
+
+function MenuIcon({
+  type,
+}: {
+  type:
+    | "dashboard"
+    | "field"
+    | "booking"
+    | "user"
+    | "report";
+}) {
+  if (type === "dashboard") {
+    return (
+      <svg
+        width="21"
+        height="21"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+      >
+        <rect x="3" y="3" width="7" height="7" rx="1" />
+        <rect x="14" y="3" width="7" height="7" rx="1" />
+        <rect x="3" y="14" width="7" height="7" rx="1" />
+        <rect x="14" y="14" width="7" height="7" rx="1" />
+      </svg>
+    );
+  }
+  if (type === "field") {
+    return (
+      <svg
+        width="21"
+        height="21"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+      >
+        <rect x="3" y="4" width="18" height="16" rx="1" />
+        <path d="M8 4v16" />
+        <path d="M16 4v16" />
+        <path d="M3 9h5" />
+        <path d="M16 9h5" />
+        <path d="M3 15h5" />
+        <path d="M16 15h5" />
+      </svg>
+    );
+  }
+
+  if (type === "booking") {
+    return (
+      <svg
+        width="21"
+        height="21"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+      >
+        <rect x="3" y="4" width="18" height="17" rx="2" />
+        <path d="M16 2v4" />
+        <path d="M8 2v4" />
+        <path d="M3 10h18" />
+        <path d="M8 14h.01" />
+        <path d="M12 14h.01" />
+        <path d="M16 14h.01" />
+      </svg>
+    );
+  }
+
+  if (type === "user") {
+    return (
+      <svg
+        width="21"
+        height="21"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+      >
+        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+        <circle cx="9" cy="7" r="4" />
+        <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+      </svg>
+    );
+  }
+
+  return (
+    <svg
+      width="21"
+      height="21"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+    >
+      <path d="M3 3v18h18" />
+      <path d="m7 16 4-5 3 3 5-7" />
+    </svg>
+  );
+}
+
 
 /* =========================================================
    FORMAT RUPIAH
@@ -578,171 +683,152 @@ export default function AdminLapanganPage() {
   ========================================================= */
 
   return (
-    <main className="min-h-screen bg-slate-50 text-slate-900">
+    <main className="min-h-screen overflow-x-hidden bg-slate-50 text-slate-900">
 
-      <div className="flex min-h-screen">
+      <div className="min-h-screen">
 
         {/* =====================================================
             SIDEBAR ADMIN
         ===================================================== */}
 
-        <aside className="hidden w-64 shrink-0 flex-col bg-slate-950 text-white lg:flex">
+         <aside className="hidden w-64 flex-col bg-slate-950 text-white lg:fixed lg:inset-y-0 lg:left-0 lg:z-30 lg:flex lg:h-screen">
 
-          {/* ===================================================
-              LOGO
-          =================================================== */}
-
-          <div className="flex items-center gap-3 border-b border-slate-800 px-6 py-6">
-
-            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-white text-lg font-bold text-slate-950">
-              L
-            </div>
-
+          {/* LOGO */}
+          <div className="flex items-center gap-3 px-6 py-6 border-b border-slate-800">
+            <img
+              src="/logo2.jpg"
+              alt="Logo Lapangan"
+              className="w-10 h-10 rounded-xl object-contain bg-white"
+            />
             <div>
-
               <h1 className="text-lg font-bold tracking-tight">
                 Lapangin
               </h1>
-
               <p className="text-xs text-slate-500">
-                Admin Panel
+                Booking Lapangan
               </p>
-
             </div>
-
           </div>
 
-          {/* ===================================================
-              MENU
-          =================================================== */}
-
-          <nav className="flex-1 px-4 py-7">
-
-            <p className="mb-4 px-3 text-xs font-semibold uppercase tracking-widest text-slate-500">
-              Menu Utama
-            </p>
-
-            <div className="space-y-1.5">
-
+          {/* NAVIGATION */}
+          <nav className="flex-1 px-4 py-6">
+            <div className="space-y-1">
               {/* DASHBOARD */}
+               <Link
+            href="/admin/dashboard"
+            className="mb-2 flex items-center gap-4 rounded-xl px-4 py-3.5 text-[13px] font-medium text-[#a6b5cf] transition hover:bg-[#111d31] hover:text-white"
+          >
+            <MenuIcon type="dashboard" />
+            <span>
+              Dashboard
+            </span>
+          </Link>
 
-              <a
-                href="/admin/dashboard"
-                className="flex items-center gap-3 rounded-xl px-3.5 py-3 text-sm font-medium text-slate-400 transition hover:bg-slate-900 hover:text-white"
-              >
 
-                <DashboardIcon />
+          {/* LAPANGAN */}
 
-                <span>
-                  Dashboard
-                </span>
+          <Link
+            href="/admin/lapangan"
+            className="mb-2 flex items-center gap-4 rounded-xl bg-[#1d2a42] px-4 py-3.5 text-[13px] font-medium text-white transition"
+          >
 
-              </a>
+            <MenuIcon type="field" />
 
-              {/* LAPANGAN AKTIF */}
+            <span>
+              Lapangan
+            </span>
 
-              <a
-                href="/admin/lapangan"
-                className="flex items-center gap-3 rounded-xl bg-[#1d2d47] px-3.5 py-3 text-sm font-semibold text-white shadow-sm"
-              >
+          </Link>
 
-                <FieldIcon />
 
-                <span>
-                  Lapangan
-                </span>
+          {/* RIWAYAT */}
 
-              </a>
+          <Link
+            href="/admin/booking"
+            className="mb-2 flex items-center gap-4 rounded-xl px-4 py-3.5 text-[13px] font-medium text-[#a6b5cf] transition hover:bg-[#111d31] hover:text-white"
+          >
 
-              {/* RIWAYAT PEMESANAN */}
+            <MenuIcon type="booking" />
 
-              <a
-                href="/admin/booking"
-                className="flex items-center gap-3 rounded-xl px-3.5 py-3 text-sm font-medium text-slate-400 transition hover:bg-slate-900 hover:text-white"
-              >
+            <span>
+              Riwayat Pemesanan
+            </span>
 
-                <BookingIcon />
+          </Link>
 
-                <span>
-                  Riwayat Pemesanan
-                </span>
 
-              </a>
+          {/* USER */}
 
-              {/* MANAJEMEN USER */}
+          <Link
+            href="/admin/customer"
+            className="mb-2 flex items-center gap-4 rounded-xl px-4 py-3.5 text-[13px] font-medium text-[#a6b5cf] transition hover:bg-[#111d31] hover:text-white"
+          >
 
-              <a
-                href="/admin/customer"
-                className="flex items-center gap-3 rounded-xl px-3.5 py-3 text-sm font-medium text-slate-400 transition hover:bg-slate-900 hover:text-white"
-              >
+            <MenuIcon type="user" />
 
-                <UserIcon />
+            <span>
+              Manajemen User
+            </span>
 
-                <span>
-                  Manajemen User
-                </span>
+          </Link>
 
-              </a>
 
-              {/* LAPORAN */}
+          {/* LAPORAN */}
 
-              <a
-                href="/admin/laporan"
-                className="flex items-center gap-3 rounded-xl px-3.5 py-3 text-sm font-medium text-slate-400 transition hover:bg-slate-900 hover:text-white"
-              >
+          <Link
+            href="/admin/laporan"
+            className="flex items-center gap-4 rounded-xl px-4 py-3.5 text-[13px] font-medium text-[#a6b5cf] transition hover:bg-[#111d31] hover:text-white"
+          >
 
-                <ReportIcon />
+            <MenuIcon type="report" />
 
-                <span>
-                  Laporan Pendapatan
-                </span>
+            <span>
+              Laporan Pendapatan
+            </span>
 
-              </a>
+          </Link>
+        </div>
 
-            </div>
 
-          </nav>
+        {/* BACK USER */}
 
-          {/* ===================================================
-              DASHBOARD USER
-          =================================================== */}
+        <div className="absolute bottom-0 left-0 right-0 border-t border-white/10 p-5">
 
-          <div className="border-t border-slate-800 p-4">
+          <Link
+            href="/dashboard"
+            className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm text-[#91a2bf] transition hover:bg-[#111d31] hover:text-white"
+          >
 
-            <a
-              href="/dashboard"
-              className="flex items-center gap-3 rounded-xl px-3 py-3 text-sm text-slate-400 transition hover:bg-slate-900 hover:text-white"
-            >
+            <span className="text-lg">
+              👤
+            </span>
+            Dashboard User
 
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-800">
+          </Link>
+        
 
-                <span className="text-sm">
-                  N
-                </span>
+          {/* USER SIDEBAR */}
 
-              </div>
-
-              <span>
-                Dashboard User
-              </span>
-
-            </a>
-
+          <div className="p-4 border-t border-slate-800 text-center">
+            <p className="text-xs text-slate-500">
+              © {new Date().getFullYear()} Lapangin. Semua hak dilindungi.
+            </p>
           </div>
-
-        </aside>
+        </div>
+      </nav>
+      </aside>
 
         {/* =====================================================
             MAIN AREA
         ===================================================== */}
 
-        <div className="min-w-0 flex-1">
+        <div className="min-w-0 lg:ml-64">
 
           {/* ===================================================
               HEADER
           =================================================== */}
 
-          <header className="flex h-24 items-center justify-between border-b border-slate-200 bg-white px-5 md:px-8">
+          <header className="sticky top-0 z-20 flex min-h-24 items-center justify-between border-b border-slate-200 bg-white px-5 py-5 shadow-sm md:px-8">
 
             <div>
 
@@ -760,23 +846,25 @@ export default function AdminLapanganPage() {
 
               {/* SEARCH HEADER */}
 
-              <div className="hidden w-72 items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 md:flex">
+              <button
+                type="button"
+                aria-label="Notifikasi"
+                className="relative flex h-10 w-10 items-center justify-center rounded-xl border border-[#dfe5ed] bg-[#f8fafc] text-[#13213a] transition hover:bg-[#eef2f7]"
+              >
+                <svg
+                  width="15"
+                  height="15"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                >
+                  <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9" />
+                  <path d="M10 21h4" />
+                </svg>
 
-                <SearchIcon />
-
-                <input
-                  type="text"
-                  value={search}
-                  onChange={(event) =>
-                    setSearch(
-                      event.target.value
-                    )
-                  }
-                  placeholder="Cari lapangan..."
-                  className="h-11 w-full bg-transparent text-sm outline-none"
-                />
-
-              </div>
+                <span className="absolute right-2 top-2 h-2.5 w-2.5 rounded-full border-2 border-[#f8fafc] bg-red-500" />
+              </button>
 
               {/* GARIS */}
 
@@ -810,7 +898,7 @@ export default function AdminLapanganPage() {
               CONTENT
           =================================================== */}
 
-          <section className="mx-auto max-w-[1600px] p-5 md:p-8">
+          <section className="mx-auto w-full max-w-[1600px] p-5 md:p-8">
 
             {/* =================================================
                 TITLE
@@ -1377,3 +1465,4 @@ export default function AdminLapanganPage() {
     </main>
   );
 }
+

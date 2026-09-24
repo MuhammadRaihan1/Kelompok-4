@@ -122,30 +122,25 @@ export default function AdminLoginPage() {
         </div>
 
         {/* LOGIN CARD */}
-        <div className="rounded-3xl border border-white/30 bg-white/95 p-6 shadow-2xl backdrop-blur-md sm:p-8">
-
+        <div className="mx-auto w-full max-w-sm rounded-3xl border border-white/30 bg-white/95 p-5 shadow-2xl backdrop-blur-md sm:p-6">
           {/* HEADER */}
           <div>
-
             <p className="text-xs font-bold uppercase tracking-[0.24em] text-[#82913c]">
               Selamat datang
             </p>
-
-            <h1 className="mt-3 text-4xl font-black tracking-[-0.04em] text-[#26372b] sm:text-3xl">
+            <h1 className="mt-1 text-4xl font-black tracking-[-0.04em] text-[#26372b] sm:text-3xl">
               Login Admin.
             </h1>
-
-            <p className="mt-3 text-sm leading-6 text-[#68736b]">
+            <p className="mt-2 text-sm leading-5 text-[#68736b]">
               Masuk menggunakan akun administrator
               Lapangin.
             </p>
-
           </div>
 
           {/* FORM */}
           <form
             onSubmit={handleSubmit}
-            className="mt-8 space-y-5"
+            className="mt-5 space-y-4"
           >
 
             {/* EMAIL */}
@@ -153,7 +148,7 @@ export default function AdminLoginPage() {
 
               <label
                 htmlFor="email"
-                className="mb-2 block text-xs font-bold uppercase tracking-[0.16em] text-[#526157]"
+                className="mb-1.5 block text-xs font-bold uppercase tracking-[0.16em] text-[#526157]"
               >
                 Email
               </label>
@@ -179,7 +174,7 @@ export default function AdminLoginPage() {
 
               <label
                 htmlFor="password"
-                className="mb-2 block text-xs font-bold uppercase tracking-[0.16em] text-[#526157]"
+                className="mb-1.5 block text-xs font-bold uppercase tracking-[0.16em] text-[#526157]"
               >
                 Password
               </label>
@@ -200,7 +195,7 @@ export default function AdminLoginPage() {
 
               <a
                 href="#forgot"
-                className="mt-2 block text-right text-xs font-bold text-[#82913c] hover:text-[#526157]"
+                className="mt-1.5 block text-right text-xs font-bold text-[#82913c] hover:text-[#526157]"
               >
                 Lupa password?
               </a>
@@ -211,7 +206,7 @@ export default function AdminLoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="flex w-full items-center justify-center rounded-xl bg-[#26372b] py-4 text-sm font-bold text-[#e5f28e] shadow-lg shadow-[#26372b]/20 transition hover:bg-[#344b39] active:scale-[0.99] disabled:cursor-wait disabled:opacity-60"
+              className="flex w-full items-center justify-center rounded-xl bg-[#26372b] py-3.5 text-sm font-bold text-[#e5f28e] shadow-lg shadow-[#26372b]/20 transition hover:bg-[#344b39] active:scale-[0.99] disabled:cursor-wait disabled:opacity-60"
             >
               {loading ? (
                 <span className="flex items-center gap-2">
@@ -229,7 +224,7 @@ export default function AdminLoginPage() {
           </form>
 
           {/* DIVIDER */}
-          <div className="my-7 flex items-center gap-4 text-[10px] font-bold uppercase tracking-[0.18em] text-[#a3ada5]">
+          <div className="my-5 flex items-center gap-4 text-[10px] font-bold uppercase tracking-[0.18em] text-[#a3ada5]">
 
             <div className="h-px flex-1 bg-[#e5e9e1]" />
 
@@ -244,7 +239,7 @@ export default function AdminLoginPage() {
             type="button"
             onClick={handleGoogleLogin}
             disabled={loading}
-            className="flex w-full items-center justify-center gap-3 rounded-xl border border-[#dce1d5] bg-white px-4 py-3.5 text-sm font-bold text-[#526157] transition hover:border-[#b7c6ad] hover:bg-[#f8f9f5] disabled:cursor-wait disabled:opacity-60"
+            className="flex w-full items-center justify-center gap-3 rounded-xl border border-[#dce1d5] bg-white px-4 py-3 text-sm font-bold text-[#526157] transition hover:border-[#b7c6ad] hover:bg-[#f8f9f5] disabled:cursor-wait disabled:opacity-60"
           >
 
             <span className="flex h-7 w-7 items-center justify-center rounded-full border border-[#dce1d5] text-sm font-black text-[#4285F4]">
@@ -258,7 +253,7 @@ export default function AdminLoginPage() {
           </button>
 
           {/* BACK TO USER LOGIN */}
-          <div className="mt-7 text-center">
+          <div className="mt-5 text-center">
 
             <a
               href="/login"

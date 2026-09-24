@@ -65,15 +65,20 @@ export default function LoginPage() {
       {/* =========================
           LEFT SIDE - BRANDING
       ========================== */}
-      <section className="hidden lg:flex lg:w-1/2 bg-slate-950 text-white relative overflow-hidden">
+      <section className="hidden lg:flex lg:w-[58%] bg-slate-950 text-white relative overflow-hidden [perspective:1200px]">
 
         {/* Background Image */}
-        <img
+        <Image
           src="/lapangan.jpeg"
           alt="Lapangan"
-          className="absolute inset-0 w-full h-full object-cover opacity-40"
+          fill
+          priority
+          className="absolute inset-0 object-cover opacity-40"
         />
-        <div className="absolute inset-0 bg-green-500/20" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(183,211,52,0.28),transparent_34%),linear-gradient(135deg,rgba(2,6,23,0.35),rgba(22,101,52,0.45))]" />
+        <div className="pointer-events-none absolute -right-24 top-1/2 h-[34rem] w-[34rem] -translate-y-1/2 rotate-[18deg] rounded-[4rem] border border-lime-200/20 bg-gradient-to-br from-lime-300/20 via-emerald-400/10 to-transparent shadow-[0_0_100px_rgba(183,211,52,0.18)] [transform:rotateY(-24deg)_rotateX(18deg)_rotateZ(18deg)] backdrop-blur-[2px]" />
+        <div className="pointer-events-none absolute -bottom-32 left-1/4 h-80 w-80 rounded-full bg-lime-300/15 blur-3xl" />
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.06)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.06)_1px,transparent_1px)] bg-[size:56px_56px] opacity-20 [transform:rotateX(58deg)_scale(1.8)_translateY(18%)]" />
 
         <div className="relative z-10 flex flex-col justify-between w-full p-12 xl:p-16">
 
@@ -183,7 +188,7 @@ export default function LoginPage() {
             </div>
           </div>
 
-          <div className="max-w-md">
+          <div className="max-w-md rounded-[10px] border border-[#e5e9e1] bg-white p-6 shadow-sm sm:p-8">
             <p className="text-xs font-bold uppercase tracking-[0.24em] text-[#82913c]">Selamat datang</p>
             <h2 className="mt-3 text-4xl font-black tracking-[-0.04em] text-[#26372b] sm:text-5xl">Masuk ke akunmu.</h2>
             <p className="mt-4 text-sm leading-6 text-[#718078]">Lanjutkan rencana pertandinganmu hari ini.</p>

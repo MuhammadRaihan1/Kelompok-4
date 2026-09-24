@@ -391,6 +391,110 @@ function Icon({
   );
 }
 
+function MenuIcon({
+  type,
+}: {
+  type:
+    | "dashboard"
+    | "field"
+    | "booking"
+    | "user"
+    | "report";
+}) {
+  if (type === "dashboard") {
+    return (
+      <svg
+        width="21"
+        height="21"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+      >
+        <rect x="3" y="3" width="7" height="7" rx="1" />
+        <rect x="14" y="3" width="7" height="7" rx="1" />
+        <rect x="3" y="14" width="7" height="7" rx="1" />
+        <rect x="14" y="14" width="7" height="7" rx="1" />
+      </svg>
+    );
+  }
+
+  if (type === "field") {
+    return (
+      <svg
+        width="21"
+        height="21"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+      >
+        <rect x="3" y="4" width="18" height="16" rx="1" />
+        <path d="M8 4v16" />
+        <path d="M16 4v16" />
+        <path d="M3 9h5" />
+        <path d="M16 9h5" />
+        <path d="M3 15h5" />
+        <path d="M16 15h5" />
+      </svg>
+    );
+  }
+
+  if (type === "booking") {
+    return (
+      <svg
+        width="21"
+        height="21"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+      >
+        <rect x="3" y="4" width="18" height="17" rx="2" />
+        <path d="M16 2v4" />
+        <path d="M8 2v4" />
+        <path d="M3 10h18" />
+        <path d="M8 14h.01" />
+        <path d="M12 14h.01" />
+        <path d="M16 14h.01" />
+      </svg>
+    );
+  }
+
+  if (type === "user") {
+    return (
+      <svg
+        width="21"
+        height="21"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+      >
+        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+        <circle cx="9" cy="7" r="4" />
+        <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+      </svg>
+    );
+  }
+
+  return (
+    <svg
+      width="21"
+      height="21"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+    >
+      <path d="M3 3v18h18" />
+      <path d="m7 16 4-5 3 3 5-7" />
+    </svg>
+  );
+}
+
+
 
 // ============================================================
 // PAGE
@@ -859,208 +963,146 @@ export default async function AdminLaporanPage({
             SIDEBAR
         ================================================== */}
 
-        <aside className="print:hidden hidden w-[260px] flex-col bg-[#020817] text-white lg:flex">
+        <aside className="hidden w-64 flex-col bg-slate-950 text-white lg:fixed lg:inset-y-0 lg:left-0 lg:z-30 lg:flex lg:h-screen">
 
           {/* LOGO */}
-
-          <div className="flex items-center gap-3 border-b border-white/10 px-6 py-6">
-
-            <div className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-xl bg-white">
-
-              <img
-                src="/logo2.jpg"
-                alt="Lapangin"
-                className="h-full w-full object-cover"
-              />
-
-            </div>
-
-
+          <div className="flex items-center gap-3 px-6 py-6 border-b border-slate-800">
+            <img
+              src="/logo2.jpg"
+              alt="Logo Lapangan"
+              className="w-10 h-10 rounded-xl object-contain bg-white"
+            />
             <div>
-
-              <h1 className="text-lg font-bold">
+              <h1 className="text-lg font-bold tracking-tight">
                 Lapangin
               </h1>
-
               <p className="text-xs text-slate-500">
-                Admin Panel
+                Booking Lapangan
               </p>
-
             </div>
-
           </div>
 
-
-          {/* MENU */}
-
+          {/* NAVIGATION */}
           <nav className="flex-1 px-4 py-6">
+            <div className="space-y-1">
 
-            <p className="mb-3 px-3 text-xs font-bold uppercase tracking-wider text-slate-500">
-              Menu Utama
-            </p>
-
-
-            <Link
-              href="/admin/dashboard"
-              className="mb-1 flex items-center gap-3 rounded-xl px-3 py-3 text-slate-400 transition hover:bg-slate-900 hover:text-white"
-            >
-
-              <Icon type="dashboard" />
-
+              {/* DASHBOARD */}
+               <Link
+            href="/admin/dashboard"
+            className="mb-2 flex items-center gap-4 rounded-xl px-4 py-3.5 text-[13px] font-medium text-[#a6b5cf] transition hover:bg-[#111d31] hover:text-white"
+          >
+            <MenuIcon type="dashboard" />
+            <span>
               Dashboard
+            </span>
+          </Link>
 
-            </Link>
 
+          {/* LAPANGAN */}
 
-            <Link
-              href="/admin/lapangan"
-              className="mb-1 flex items-center gap-3 rounded-xl px-3 py-3 text-slate-400 transition hover:bg-slate-900 hover:text-white"
-            >
+          <Link
+            href="/admin/lapangan"
+            className="mb-2 flex items-center gap-4 rounded-xl px-4 py-3.5 text-[13px] font-medium text-[#a6b5cf] transition hover:bg-[#111d31] hover:text-white"
+          >
 
-              <Icon type="field" />
+            <MenuIcon type="field" />
 
+            <span>
               Lapangan
+            </span>
 
-            </Link>
-
-
-            <Link
-              href="/admin/booking"
-              className="mb-1 flex items-center gap-3 rounded-xl px-3 py-3 text-slate-400 transition hover:bg-slate-900 hover:text-white"
-            >
-
-              <Icon type="booking" />
-
-              Booking
-
-            </Link>
+          </Link>
 
 
-            <Link
-              href="/admin/customer"
-              className="mb-1 flex items-center gap-3 rounded-xl px-3 py-3 text-slate-400 transition hover:bg-slate-900 hover:text-white"
-            >
+          {/* RIWAYAT */}
 
-              <Icon type="users" />
+          <Link
+            href="/admin/booking"
+            className="mb-2 flex items-center gap-4 rounded-xl px-4 py-3.5 text-[13px] font-medium text-[#a6b5cf] transition hover:bg-[#111d31] hover:text-white"
+          >
 
+            <MenuIcon type="booking" />
+
+            <span>
+              Riwayat Pemesanan
+            </span>
+
+          </Link>
+
+
+          {/* USER */}
+
+          <Link
+            href="/admin/customer"
+            className="mb-2 flex items-center gap-4 rounded-xl px-4 py-3.5 text-[13px] font-medium text-[#a6b5cf] transition hover:bg-[#111d31] hover:text-white"
+          >
+
+            <MenuIcon type="user" />
+
+            <span>
               Manajemen User
+            </span>
 
-            </Link>
-
-
-            <Link
-              href="/admin/laporan"
-              className="mb-1 flex items-center gap-3 rounded-xl bg-slate-800 px-3 py-3 font-semibold text-white"
-            >
-
-              <Icon type="report" />
-
-              Laporan
-
-            </Link>
+          </Link>
 
 
-            <p className="mb-3 mt-7 px-3 text-xs font-bold uppercase tracking-wider text-slate-500">
-              Data
+          {/* LAPORAN */}
+
+          <Link
+            href="/admin/laporan"
+            className="mb-2 flex items-center gap-4 rounded-xl bg-[#1d2a42] px-4 py-3.5 text-[13px] font-medium text-white transition"
+          >
+
+            <MenuIcon type="report" />
+
+            <span>
+              Laporan Pendapatan
+            </span>
+
+          </Link>
+        </div>
+
+
+        {/* BACK USER */}
+
+        <div className="absolute bottom-0 left-0 right-0 border-t border-white/10 p-5">
+
+          <Link
+            href="/dashboard"
+            className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm text-[#91a2bf] transition hover:bg-[#111d31] hover:text-white"
+          >
+
+            <span className="text-lg">
+              👤
+            </span>
+            Dashboard User
+
+          </Link>
+        
+
+          {/* USER SIDEBAR */}
+
+          <div className="p-4 border-t border-slate-800 text-center">
+            <p className="text-xs text-slate-500">
+              © {new Date().getFullYear()} Lapangin. Semua hak dilindungi.
             </p>
-
-
-            <Link
-              href="/admin/booking"
-              className="flex items-center gap-3 rounded-xl px-3 py-3 text-slate-400 transition hover:bg-slate-900 hover:text-white"
-            >
-
-              <Icon type="history" />
-
-              Riwayat Booking
-
-            </Link>
-
-          </nav>
-
-
-          {/* ADMIN */}
-
-          <div className="border-t border-white/10 p-4">
-
-            <div className="mb-3 flex items-center gap-3 rounded-xl bg-slate-900 p-3">
-
-              {adminUser.image ? (
-
-                <img
-                  src={adminUser.image}
-                  alt={
-                    adminUser.name ||
-                    "Admin"
-                  }
-                  className="h-10 w-10 rounded-full object-cover"
-                />
-
-              ) : (
-
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-700 font-bold">
-
-                  {(
-                    adminUser.name ||
-                    adminUser.email ||
-                    "A"
-                  )
-                    .charAt(0)
-                    .toUpperCase()}
-
-                </div>
-
-              )}
-
-
-              <div className="min-w-0">
-
-                <p className="truncate text-sm font-semibold">
-                  {adminUser.name ||
-                    "Administrator"}
-                </p>
-
-                <p className="truncate text-xs text-slate-500">
-                  {adminUser.email}
-                </p>
-
-              </div>
-
-            </div>
-
-
-            <form action={logout}>
-
-              <button
-                type="submit"
-                className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold text-slate-400 transition hover:bg-red-500/10 hover:text-red-400"
-              >
-
-                <Icon type="logout" />
-
-                Keluar
-
-              </button>
-
-            </form>
-
           </div>
-
-        </aside>
+        </div>
+      </nav>
+      </aside>
 
 
         {/* ==================================================
             MAIN
         ================================================== */}
 
-        <div className="min-w-0 flex-1">
+        <div className="min-w-0 lg:ml-64">
 
 
           {/* TOPBAR */}
 
-          <header className="print:hidden h-20 border-b border-slate-200 bg-white">
-
-            <div className="flex h-full items-center justify-between px-5 md:px-8">
+          <header className="min-h-[6.5625rem] border-b border-[#e4e8ef] bg-white">
+          <div className="flex min-h-[6.5625rem] flex-wrap items-center justify-between gap-4 px-4 py-4 sm:px-9">
 
               <div>
 
@@ -1223,7 +1265,7 @@ export default async function AdminLaporanPage({
 
                 <div>
 
-                  <p className="mb-2 text-sm font-semibold text-blue-600">
+                  <p className="mb-2 text-sm font-semibold text-[#8da0bd]">
                     Analisis Sistem
                   </p>
 

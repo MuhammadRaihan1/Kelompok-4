@@ -1,7 +1,6 @@
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import Link from "next/link";
-
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
@@ -311,11 +310,8 @@ export default async function BookingPage({
   // ==========================================================
 
   const params = await searchParams;
-
   const lapanganId = params.lapangan;
-
   const tanggalParam = params.tanggal;
-
   const errorMessage = params.error;
 
 
@@ -324,7 +320,6 @@ export default async function BookingPage({
   // ==========================================================
 
   const requestHeaders = await headers();
-
   const session = await auth.api.getSession({
     headers: requestHeaders,
   });
@@ -332,6 +327,18 @@ export default async function BookingPage({
   if (!session) {
     redirect("/");
   }
+
+   const user = session.user;
+  
+    async function logout() {
+      "use server";
+  
+      await auth.api.signOut({
+        headers: await headers(),
+      });
+  
+      redirect("/");
+    }
 
 
   // ==========================================================
@@ -507,7 +514,6 @@ export default async function BookingPage({
 
     const currentHeaders =
       await headers();
-
     const currentSession =
       await auth.api.getSession({
         headers: currentHeaders,
@@ -955,141 +961,165 @@ export default async function BookingPage({
             SIDEBAR
         ================================================== */}
 
-        <aside className="hidden w-[260px] flex-col bg-[#020817] text-white lg:flex">
-
-          <div className="flex items-center gap-3 border-b border-white/10 px-6 py-6">
-
-            <div className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-xl bg-white">
-
-              <img
-                src="/logo2.jpg"
-                alt="Lapangin"
-                className="h-full w-full object-cover"
-              />
-
-            </div>
-
+        <aside className="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:z-30 lg:flex lg:h-screen w-64 flex-col bg-slate-950 text-white">
+          {/* LOGO */}
+          <div className="flex items-center gap-3 px-6 py-6 border-b border-slate-800">
+            <img
+              src="/logo2.jpg"
+              alt="Logo Lapangan"
+              className="w-10 h-10 rounded-xl object-contain bg-white"
+            />
             <div>
-
-              <h1 className="text-lg font-bold">
+              <h1 className="text-lg font-bold tracking-tight">
                 Lapangin
               </h1>
-
               <p className="text-xs text-slate-500">
                 Booking Lapangan
               </p>
-
             </div>
-
           </div>
 
-
+          {/* NAVIGATION */}
           <nav className="flex-1 px-4 py-6">
+            <div className="space-y-1">
 
-            <p className="mb-3 px-3 text-xs font-bold uppercase tracking-wider text-slate-500">
-              Menu Utama
-            </p>
+              {/* DASHBOARD */}
+              <a
+                href="/dashboard"
+                className="flex items-center gap-3 px-3 py-3 rounded-xl text-slate-400 hover:bg-slate-900 hover:text-white transition"
+              >
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                >
+                  <rect
+                    x="3"
+                    y="3"
+                    width="7"
+                    height="7"
+                    rx="1"
+                  />
+                  <rect
+                    x="14"
+                    y="3"
+                    width="7"
+                    height="7"
+                    rx="1"
+                  />
+                  <rect
+                    x="3"
+                    y="14"
+                    width="7"
+                    height="7"
+                    rx="1"
+                  />
+                  <rect
+                    x="14"
+                    y="14"
+                    width="7"
+                    height="7"
+                    rx="1"
+                  />
+                </svg>
+                Dashboard
+              </a>
 
+              {/* LAPANGAN */}
 
-            <Link
-              href="/dashboard"
-              className="mb-1 flex items-center gap-3 rounded-xl px-3 py-3 text-slate-400 transition hover:bg-slate-900 hover:text-white"
-            >
+              <Link
+                href="/dashboard/lapangan"
+                className="flex items-center gap-3 px-3 py-3 rounded-xl text-slate-400 hover:bg-slate-900 hover:text-white transition"
+              >
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                >
+                  <rect
+                    x="3"
+                    y="4"
+                    width="18"
+                    height="16"
+                    rx="2"
+                  />
+                  <path d="M3 12h18" />
+                  <path d="M12 4v16" />
+                  <circle
+                    cx="12"
+                    cy="12"
+                    r="2"
+                  />
+                </svg>
+                Lapangan
+              </Link>
+              {/* BOOKING */}
+              <a
+                href="/dashboard/booking"
+                className="flex items-center gap-3 px-3 py-3 rounded-xl bg-slate-800 text-white font-medium"
+              >
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                >
+                  <rect
+                    x="3"
+                    y="4"
+                    width="18"
+                    height="17"
+                    rx="2"
+                  />
+                  <path d="M16 2v4" />
+                  <path d="M8 2v4" />
+                  <path d="M3 10h18" />
+                  <path d="M8 14h3" />
+                  <path d="M8 17h6" />
+                </svg>
+                Pesan Lapangan
+              </a>
 
-              <Icon type="dashboard" />
-
-              Dashboard
-
-            </Link>
-
-
-            <Link
-              href="/dashboard/lapangan"
-              className="mb-1 flex items-center gap-3 rounded-xl px-3 py-3 text-slate-400 transition hover:bg-slate-900 hover:text-white"
-            >
-
-              <Icon type="field" />
-
-              Lapangan
-
-            </Link>
-
-
-            <Link
-              href="/dashboard/booking"
-              className="mb-1 flex items-center gap-3 rounded-xl bg-slate-800 px-3 py-3 font-semibold text-white"
-            >
-
-              <Icon type="booking" />
-
-              Pesan Lapangan
-
-            </Link>
-
-
-            <Link
-              href="/dashboard/riwayat"
-              className="flex items-center gap-3 rounded-xl px-3 py-3 text-slate-400 transition hover:bg-slate-900 hover:text-white"
-            >
-
-              <Icon type="history" />
-
-              Riwayat Pemesanan
-
-            </Link>
-
+              {/* RIWAYAT */}
+              <a
+                href="/dashboard/riwayat"
+                className="flex items-center gap-3 px-3 py-3 rounded-xl text-slate-400 hover:bg-slate-900 hover:text-white transition"
+              >
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                >
+                  <circle
+                    cx="12"
+                    cy="12"
+                    r="9"
+                  />
+                  <path d="M12 7v5l3 2" />
+                </svg>
+                Riwayat Pemesanan
+              </a>
+            </div>
           </nav>
 
+          {/* USER SIDEBAR */}
 
-          <div className="border-t border-white/10 p-4">
-
-            <div className="flex items-center gap-3 rounded-xl bg-slate-900 p-3">
-
-              {session.user.image ? (
-
-                <img
-                  src={session.user.image}
-                  alt={
-                    session.user.name ||
-                    "User"
-                  }
-                  className="h-10 w-10 rounded-full object-cover"
-                />
-
-              ) : (
-
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-700 font-bold">
-
-                  {(
-                    session.user.name ||
-                    session.user.email ||
-                    "U"
-                  )
-                    .charAt(0)
-                    .toUpperCase()}
-
-                </div>
-
-              )}
-
-
-              <div className="min-w-0">
-
-                <p className="truncate text-sm font-semibold">
-                  {session.user.name ||
-                    "Pelanggan"}
-                </p>
-
-                <p className="truncate text-xs text-slate-500">
-                  {session.user.email}
-                </p>
-
-              </div>
-
-            </div>
-
+          <div className="p-4 border-t border-slate-800 text-center">
+            <p className="text-xs text-slate-500">
+              © {new Date().getFullYear()} Lapangin. Semua hak dilindungi.
+            </p>
           </div>
-
         </aside>
 
 
@@ -1097,58 +1127,142 @@ export default async function BookingPage({
             MAIN
         ================================================== */}
 
-        <div className="min-w-0 flex-1">
+        <div className="flex-2 min-w-0 lg:ml-64">
 
 
           {/* TOPBAR */}
 
           <header className="h-20 border-b border-slate-200 bg-white">
-
             <div className="flex h-full items-center justify-between px-5 md:px-8">
-
-              <div>
-
-                <p className="text-xs font-medium text-slate-400">
-                  Pemesanan
-                </p>
-
-                <h2 className="text-xl font-bold">
-                  Jadwal Booking
-                </h2>
-
+              <div className="flex items-center gap-2">
+                <a
+                  href="/dashboard"
+                  className="text-slate-400 transition hover:text-slate-700"
+                >
+                  Dashboard
+                </a>
+                <span className="text-slate-300">
+                  /
+                </span>
+                <a
+                  href="/dashboard/lapangan"
+                  className="text-slate-400 transition hover:text-slate-700"
+                >
+                  Lapangan
+                </a>
+                <span className="text-slate-300">
+                  /
+                </span>
+                <span className="font-medium text-slate-700">
+                  Pesan Lapangan
+                </span>
               </div>
+              <div className="flex items-center gap-2">
+              <details className="relative shrink-0">
+                <summary
+                  aria-label="Notifikasi"
+                  className="relative flex h-10 w-10 cursor-pointer list-none items-center justify-center rounded-xl text-slate-600 transition hover:bg-slate-100 hover:text-slate-950 [&::-webkit-details-marker]:hidden"
+                >
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9" />
+                    <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+                  </svg>
+                  <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-red-500" />
+                </summary>
+                <div className="absolute right-0 z-20 mt-3 w-80 rounded-2xl border border-slate-200 bg-white p-4 text-left shadow-xl">
+                  <div className="flex items-center justify-between">
+                    <h2 className="font-semibold text-slate-950">Notifikasi</h2>
+                    <span className="rounded-full bg-red-100 px-2 py-1 text-xs font-medium text-red-600">Baru</span>
+                  </div>
+                  <div className="mt-3 rounded-xl bg-slate-50 p-3">
+                    <p className="text-sm font-medium text-slate-900">Pesan terbaru</p>
+                    <p className="mt-1 text-xs leading-relaxed text-slate-500">
+                      Booking Anda telah diterima. Silakan cek detail pemesanan untuk melihat status dan bukti pembayaran.
+                    </p>
+                  </div>
+                </div>
+              </details>
+              <details className="relative shrink-0">
+                <summary className="flex cursor-pointer list-none items-center gap-3 rounded-xl p-1 hover:bg-slate-100 [&::-webkit-details-marker]:hidden">
+                  <div className="hidden sm:block text-right">
+                    <p className="text-sm font-semibold">
+                      {user.name || "Pelanggan"}
+                    </p>
+                    <p className="text-xs text-slate-500">
+                      Pelanggan
+                    </p>
+                  </div>
 
+                  {user.image ? (
+                    <img
+                      src={user.image}
+                      alt={user.name || "User"}
+                      className="w-10 h-10 rounded-full object-cover border border-slate-200"
+                    />
+                  ) : (
+                    <div className="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center font-semibold">
+                      {user.name
+                        ?.charAt(0)
+                        .toUpperCase() || "U"}
+                    </div>
+                  )}
+                </summary>
 
-              <Link
-                href="/dashboard/riwayat"
-                className="rounded-xl bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-200"
-              >
-                Riwayat Booking
-              </Link>
-
+                <div className="absolute right-0 top-14 z-20 w-64 rounded-xl border border-slate-200 bg-white p-4 shadow-lg">
+                  <p className="text-sm font-semibold text-slate-950">
+                    {user.name || "Pelanggan"}
+                  </p>
+                  <p className="mt-1 text-xs text-slate-500">
+                    {user.email}
+                  </p>
+                  <div className="mt-3 flex items-center gap-2 text-sm text-emerald-600">
+                    <span className="h-2 w-2 rounded-full bg-emerald-500" />
+                    Status: Pelanggan
+                  </div>
+                  <form action={logout} className="mt-4 border-t border-slate-100 pt-3">
+                    <button
+                      type="submit"
+                      className="w-full rounded-lg bg-slate-950 px-3 py-2 text-sm font-semibold text-white transition hover:bg-slate-800"
+                    >
+                      Keluar
+                    </button>
+                  </form>
+                </div>
+              </details>
+              </div>
             </div>
-
           </header>
 
 
           {/* CONTENT */}
 
           <div className="p-5 md:p-8">
-
-
             {/* BACK */}
-
-            <Link
-              href="/dashboard/lapangan"
-              className="mb-6 inline-flex items-center gap-2 text-sm font-semibold text-slate-500 transition hover:text-slate-900"
-            >
-
-              <Icon type="back" />
-
-              Kembali ke daftar lapangan
-
-            </Link>
-
+            <div className="mb-6 flex items-center justify-between">
+              <Link
+                href="/dashboard/lapangan"
+                className="inline-flex items-center gap-2 text-sm font-semibold text-slate-500 transition hover:text-slate-900"
+              >
+                <Icon type="back" />
+                Kembali ke daftar lapangan
+              </Link>
+              <Link
+                href="/dashboard/riwayat"
+                className="rounded-xl bg-blue-100 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-200"
+              >
+                Riwayat Booking
+              </Link>
+            </div>
 
             {/* ERROR */}
 
@@ -1992,16 +2106,8 @@ export default async function BookingPage({
                     </p>
 
                   </div>
-
                 </div>
-
-
-                <p className="text-xs text-slate-400">
-                  Total = durasi × harga per jam
-                </p>
-
               </div>
-
             </div>
 
 
