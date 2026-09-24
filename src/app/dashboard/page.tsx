@@ -87,10 +87,8 @@ function FieldIcon() {
       stroke="currentColor"
       strokeWidth="1.8"
     >
-      <rect x="3" y="4" width="18" height="16" rx="2" />
-      <path d="M3 12h18" />
-      <path d="M12 4v16" />
-      <circle cx="12" cy="12" r="2" />
+      <path d="M4 5h16v14H4z" />
+      <path d="M4 9h16M8 5v14M16 5v14" />
     </svg>
   );
 }
@@ -476,26 +474,13 @@ export default async function DashboardPage() {
 
               <Link
                 href="/dashboard/lapangan"
-                className="group flex items-center gap-3 rounded-2xl px-4 py-3.5 text-sm font-medium text-slate-400 transition hover:bg-white/5 hover:text-white"
+                 className="group flex items-center gap-3 rounded-2xl px-4 py-3.5 text-sm font-medium text-slate-400 transition hover:bg-white/5 hover:text-white"
               >
                 <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/5 text-slate-400 transition group-hover:bg-white/10 group-hover:text-white">
                   <FieldIcon />
                 </span>
 
                 Lapangan
-              </Link>
-
-              {/* BOOKING */}
-
-              <Link
-                href="/dashboard/booking"
-                className="group flex items-center gap-3 rounded-2xl px-4 py-3.5 text-sm font-medium text-slate-400 transition hover:bg-white/5 hover:text-white"
-              >
-                <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/5 text-slate-400 transition group-hover:bg-white/10 group-hover:text-white">
-                  <BookingIcon />
-                </span>
-
-                Pesan Lapangan
               </Link>
 
               {/* RIWAYAT */}
@@ -812,7 +797,7 @@ export default async function DashboardPage() {
 
                 <h1 className="text-3xl font-black tracking-tight text-[#07152f] md:text-4xl">
                   Selamat datang,{" "}
-                  <span className="text-slate-500">
+                  <span className="text-[#2e3963]">
                     {namaDepan}
                   </span>{" "}
                   👋

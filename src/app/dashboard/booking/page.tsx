@@ -142,6 +142,110 @@ function formatDurasi(durasi: number) {
 // ============================================================
 // ICON
 // ============================================================
+function DashboardIcon() {
+  return (
+    <svg
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+    >
+      <rect x="3" y="3" width="7" height="7" rx="1" />
+      <rect x="14" y="3" width="7" height="7" rx="1" />
+      <rect x="3" y="14" width="7" height="7" rx="1" />
+      <rect x="14" y="14" width="7" height="7" rx="1" />
+    </svg>
+  );
+}
+function FieldIcon() {
+  return (
+    <svg
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+    >
+      <path d="M4 5h16v14H4z" />
+      <path d="M4 9h16M8 5v14M16 5v14" />
+    </svg>
+  );
+}
+
+function BookingIcon() {
+  return (
+    <svg
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+    >
+      <rect x="3" y="4" width="18" height="17" rx="2" />
+      <path d="M16 2v4" />
+      <path d="M8 2v4" />
+      <path d="M3 10h18" />
+      <path d="M8 14h3" />
+      <path d="M8 17h6" />
+    </svg>
+  );
+}
+
+function HistoryIcon() {
+  return (
+    <svg
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+    >
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 7v5l3 2" />
+    </svg>
+  );
+}
+
+function ArrowRightIcon() {
+  return (
+    <svg
+      width="17"
+      height="17"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M5 12h14" />
+      <path d="m13 6 6 6-6 6" />
+    </svg>
+  );
+}
+
+function BellIcon() {
+  return (
+    <svg
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9" />
+      <path d="M10 21h4" />
+    </svg>
+  );
+}
 
 function Icon({
   type,
@@ -328,7 +432,12 @@ export default async function BookingPage({
     redirect("/");
   }
 
-   const user = session.user;
+  const user = session.user;
+  const userName =
+    user.name?.trim() ||
+    user.email?.split("@")[0] ||
+    "Pelanggan";
+  const avatarText = userName.slice(0, 2).toUpperCase();
   
     async function logout() {
       "use server";
@@ -337,6 +446,17 @@ export default async function BookingPage({
         headers: await headers(),
       });
   
+      redirect("/");
+    }
+const currentHeaders =
+      await headers();
+    const currentSession =
+      await auth.api.getSession({
+        headers: currentHeaders,
+      });
+
+
+    if (!currentSession) {
       redirect("/");
     }
 
@@ -506,24 +626,6 @@ export default async function BookingPage({
     formData: FormData
   ) {
     "use server";
-
-
-    // ========================================================
-    // SESSION
-    // ========================================================
-
-    const currentHeaders =
-      await headers();
-    const currentSession =
-      await auth.api.getSession({
-        headers: currentHeaders,
-      });
-
-
-    if (!currentSession) {
-      redirect("/");
-    }
-
 
     // ========================================================
     // FORM DATA
@@ -961,163 +1063,150 @@ export default async function BookingPage({
             SIDEBAR
         ================================================== */}
 
-        <aside className="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:z-30 lg:flex lg:h-screen w-64 flex-col bg-slate-950 text-white">
+        <aside className="fixed inset-y-0 left-0 z-40 hidden w-[270px] flex-col border-r border-white/5 bg-[#050b1b] text-white lg:flex">
+
           {/* LOGO */}
-          <div className="flex items-center gap-3 px-6 py-6 border-b border-slate-800">
-            <img
-              src="/logo2.jpg"
-              alt="Logo Lapangan"
-              className="w-10 h-10 rounded-xl object-contain bg-white"
-            />
-            <div>
-              <h1 className="text-lg font-bold tracking-tight">
-                Lapangin
-              </h1>
-              <p className="text-xs text-slate-500">
-                Booking Lapangan
-              </p>
-            </div>
+
+          <div className="flex h-[88px] items-center border-b border-white/10 px-6">
+            <Link
+              href="/dashboard"
+              className="flex items-center gap-3"
+            >
+              <div className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-2xl bg-white shadow-lg">
+                <img
+                  src="/logo2.jpg"
+                  alt="Lapangin"
+                  className="h-full w-full object-contain"
+                />
+              </div>
+
+              <div>
+                <h1 className="text-lg font-bold tracking-tight">
+                  Lapangin
+                </h1>
+
+                <p className="text-[11px] text-slate-400">
+                  Booking Lapangan
+                </p>
+              </div>
+            </Link>
           </div>
 
           {/* NAVIGATION */}
-          <nav className="flex-1 px-4 py-6">
-            <div className="space-y-1">
+
+          <nav className="flex-1 px-4 py-7">
+
+            <p className="mb-3 px-3 text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500">
+              Menu Utama
+            </p>
+
+            <div className="space-y-1.5">
 
               {/* DASHBOARD */}
-              <a
+
+              <Link
                 href="/dashboard"
-                className="flex items-center gap-3 px-3 py-3 rounded-xl text-slate-400 hover:bg-slate-900 hover:text-white transition"
+                className="group flex items-center gap-3 rounded-2xl px-4 py-3.5 text-sm font-medium text-slate-400 transition hover:bg-white/5 hover:text-white"
+               
               >
-                <svg
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.8"
-                >
-                  <rect
-                    x="3"
-                    y="3"
-                    width="7"
-                    height="7"
-                    rx="1"
-                  />
-                  <rect
-                    x="14"
-                    y="3"
-                    width="7"
-                    height="7"
-                    rx="1"
-                  />
-                  <rect
-                    x="3"
-                    y="14"
-                    width="7"
-                    height="7"
-                    rx="1"
-                  />
-                  <rect
-                    x="14"
-                    y="14"
-                    width="7"
-                    height="7"
-                    rx="1"
-                  />
-                </svg>
+                <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/5 text-slate-400 transition group-hover:bg-white/10 group-hover:text-white">
+                  <DashboardIcon />
+                </span>
+
                 Dashboard
-              </a>
+              </Link>
 
               {/* LAPANGAN */}
 
               <Link
                 href="/dashboard/lapangan"
-                className="flex items-center gap-3 px-3 py-3 rounded-xl text-slate-400 hover:bg-slate-900 hover:text-white transition"
+                 className="group flex items-center gap-3 rounded-2xl px-4 py-3.5 text-sm font-medium text-slate-400 transition hover:bg-white/5 hover:text-white"
               >
-                <svg
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.8"
-                >
-                  <rect
-                    x="3"
-                    y="4"
-                    width="18"
-                    height="16"
-                    rx="2"
-                  />
-                  <path d="M3 12h18" />
-                  <path d="M12 4v16" />
-                  <circle
-                    cx="12"
-                    cy="12"
-                    r="2"
-                  />
-                </svg>
+                <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/5 text-slate-400 transition group-hover:bg-white/10 group-hover:text-white">
+                  <FieldIcon />
+                </span>
+
                 Lapangan
               </Link>
+
               {/* BOOKING */}
-              <a
+
+              <Link
                 href="/dashboard/booking"
-                className="flex items-center gap-3 px-3 py-3 rounded-xl bg-slate-800 text-white font-medium"
+                className="group flex items-center gap-3 rounded-2xl bg-white px-4 py-3.5 text-sm font-semibold text-[#07152f] shadow-lg shadow-black/10"
               >
-                <svg
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.8"
-                >
-                  <rect
-                    x="3"
-                    y="4"
-                    width="18"
-                    height="17"
-                    rx="2"
-                  />
-                  <path d="M16 2v4" />
-                  <path d="M8 2v4" />
-                  <path d="M3 10h18" />
-                  <path d="M8 14h3" />
-                  <path d="M8 17h6" />
-                </svg>
+                <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#07152f] text-white">
+                  <BookingIcon />
+                </span>
+
                 Pesan Lapangan
-              </a>
+              </Link>
 
               {/* RIWAYAT */}
-              <a
+
+              <Link
                 href="/dashboard/riwayat"
-                className="flex items-center gap-3 px-3 py-3 rounded-xl text-slate-400 hover:bg-slate-900 hover:text-white transition"
+                className="group flex items-center gap-3 rounded-2xl px-4 py-3.5 text-sm font-medium text-slate-400 transition hover:bg-white/5 hover:text-white"
               >
-                <svg
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.8"
-                >
-                  <circle
-                    cx="12"
-                    cy="12"
-                    r="9"
-                  />
-                  <path d="M12 7v5l3 2" />
-                </svg>
+                <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/5 text-slate-400 transition group-hover:bg-white/10 group-hover:text-white">
+                  <HistoryIcon />
+                </span>
+
                 Riwayat Pemesanan
-              </a>
+              </Link>
             </div>
+            <div className="mt-8 rounded-2xl border border-white/10 bg-gradient-to-br from-white/10 to-white/[0.03] p-4">
+                          <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 text-white">
+                            ⚡
+                          </div>
+            
+                          <p className="text-sm font-semibold">
+                            Mau bermain?
+                          </p>
+            
+                          <p className="mt-1 text-xs leading-5 text-slate-400">
+                            Temukan lapangan favoritmu dan booking sekarang.
+                          </p>
+            
+                          <Link
+                            href="/dashboard/lapangan"
+                            className="mt-4 flex items-center justify-center gap-2 rounded-xl bg-white px-3 py-2.5 text-xs font-bold text-[#07152f] transition hover:bg-slate-100"
+                          >
+                            Cari Lapangan
+                            <ArrowRightIcon />
+                          </Link>
+              </div>
           </nav>
 
-          {/* USER SIDEBAR */}
+          {/* SIDEBAR FOOTER */}
 
-          <div className="p-4 border-t border-slate-800 text-center">
-            <p className="text-xs text-slate-500">
-              © {new Date().getFullYear()} Lapangin. Semua hak dilindungi.
+          <div className="border-t border-white/10 p-5">
+            <div className="flex items-center gap-3 rounded-2xl bg-white/5 p-3">
+              {user.image ? (
+                <img
+                  src={user.image}
+                  alt={userName}
+                  className="h-9 w-9 rounded-xl object-cover"
+                />
+              ) : (
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white text-sm font-bold text-[#07152f]">
+                  {avatarText}
+                </div>
+              )}
+
+              <div className="min-w-0">
+                <p className="truncate text-xs font-semibold text-white">
+                  {userName}
+                </p>
+
+                <p className="text-[10px] text-slate-500">
+                  Pelanggan
+                </p>
+              </div>
+            </div>
+
+            <p className="mt-4 text-center text-[10px] text-slate-600">
+              © {new Date().getFullYear()} Lapangin
             </p>
           </div>
         </aside>
@@ -1132,9 +1221,35 @@ export default async function BookingPage({
 
           {/* TOPBAR */}
 
-          <header className="h-20 border-b border-slate-200 bg-white">
-            <div className="flex h-full items-center justify-between px-5 md:px-8">
-              <div className="flex items-center gap-2">
+          <header className="sticky top-0 z-30 h-[82px] border-b border-slate-200/80 bg-white/90 px-5 backdrop-blur-xl md:px-8">
+
+            <div className="flex h-full items-center justify-between">
+
+              {/* MOBILE BRAND */}
+
+              <div className="flex items-center gap-3 lg:hidden">
+                <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-slate-200">
+                  <img
+                    src="/logo2.jpg"
+                    alt="Lapangin"
+                    className="h-full w-full object-contain"
+                  />
+                </div>
+
+                <div>
+                  <p className="font-bold text-[#07152f]">
+                    Lapangin
+                  </p>
+
+                  <p className="text-[10px] text-slate-400">
+                    Booking Lapangan
+                  </p>
+                </div>
+              </div>
+
+              {/* DESKTOP PAGE TITLE */}
+
+              <div className="hidden items-center gap-2 lg:flex">
                 <a
                   href="/dashboard"
                   className="text-slate-400 transition hover:text-slate-700"
@@ -1144,101 +1259,178 @@ export default async function BookingPage({
                 <span className="text-slate-300">
                   /
                 </span>
-                <a
-                  href="/dashboard/lapangan"
-                  className="text-slate-400 transition hover:text-slate-700"
-                >
-                  Lapangan
-                </a>
-                <span className="text-slate-300">
-                  /
-                </span>
                 <span className="font-medium text-slate-700">
-                  Pesan Lapangan
+                  Lapangan
                 </span>
               </div>
-              <div className="flex items-center gap-2">
-              <details className="relative shrink-0">
-                <summary
-                  aria-label="Notifikasi"
-                  className="relative flex h-10 w-10 cursor-pointer list-none items-center justify-center rounded-xl text-slate-600 transition hover:bg-slate-100 hover:text-slate-950 [&::-webkit-details-marker]:hidden"
-                >
-                  <svg
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    aria-hidden="true"
-                  >
-                    <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9" />
-                    <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-                  </svg>
-                  <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-red-500" />
-                </summary>
-                <div className="absolute right-0 z-20 mt-3 w-80 rounded-2xl border border-slate-200 bg-white p-4 text-left shadow-xl">
-                  <div className="flex items-center justify-between">
-                    <h2 className="font-semibold text-slate-950">Notifikasi</h2>
-                    <span className="rounded-full bg-red-100 px-2 py-1 text-xs font-medium text-red-600">Baru</span>
-                  </div>
-                  <div className="mt-3 rounded-xl bg-slate-50 p-3">
-                    <p className="text-sm font-medium text-slate-900">Pesan terbaru</p>
-                    <p className="mt-1 text-xs leading-relaxed text-slate-500">
-                      Booking Anda telah diterima. Silakan cek detail pemesanan untuk melihat status dan bukti pembayaran.
-                    </p>
-                  </div>
-                </div>
-              </details>
-              <details className="relative shrink-0">
-                <summary className="flex cursor-pointer list-none items-center gap-3 rounded-xl p-1 hover:bg-slate-100 [&::-webkit-details-marker]:hidden">
-                  <div className="hidden sm:block text-right">
-                    <p className="text-sm font-semibold">
-                      {user.name || "Pelanggan"}
-                    </p>
-                    <p className="text-xs text-slate-500">
-                      Pelanggan
-                    </p>
-                  </div>
 
-                  {user.image ? (
-                    <img
-                      src={user.image}
-                      alt={user.name || "User"}
-                      className="w-10 h-10 rounded-full object-cover border border-slate-200"
-                    />
-                  ) : (
-                    <div className="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center font-semibold">
-                      {user.name
-                        ?.charAt(0)
-                        .toUpperCase() || "U"}
+              {/* RIGHT */}
+
+              <div className="ml-auto flex items-center gap-3">
+
+                {/* NOTIFICATION */}
+
+                <details className="relative">
+                  <summary className="group flex h-11 w-11 cursor-pointer list-none items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-600 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 [&::-webkit-details-marker]:hidden">
+
+                    <BellIcon />
+
+                    <span className="absolute right-2.5 top-2 h-2 w-2 rounded-full bg-red-500 ring-2 ring-white" />
+                  </summary>
+
+                  <div className="absolute right-0 top-14 z-50 w-[350px] overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl shadow-slate-900/10">
+
+                    <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+
+                      <div>
+                        <h3 className="text-sm font-bold text-slate-900">
+                          Notifikasi
+                        </h3>
+
+                        <p className="mt-0.5 text-xs text-slate-400">
+                          Informasi terbaru akun kamu
+                        </p>
+                      </div>
+
+                      <span className="rounded-full bg-red-50 px-2.5 py-1 text-[10px] font-bold text-red-500">
+                        Baru
+                      </span>
                     </div>
-                  )}
-                </summary>
 
-                <div className="absolute right-0 top-14 z-20 w-64 rounded-xl border border-slate-200 bg-white p-4 shadow-lg">
-                  <p className="text-sm font-semibold text-slate-950">
-                    {user.name || "Pelanggan"}
-                  </p>
-                  <p className="mt-1 text-xs text-slate-500">
-                    {user.email}
-                  </p>
-                  <div className="mt-3 flex items-center gap-2 text-sm text-emerald-600">
-                    <span className="h-2 w-2 rounded-full bg-emerald-500" />
-                    Status: Pelanggan
-                  </div>
-                  <form action={logout} className="mt-4 border-t border-slate-100 pt-3">
-                    <button
-                      type="submit"
-                      className="w-full rounded-lg bg-slate-950 px-3 py-2 text-sm font-semibold text-white transition hover:bg-slate-800"
+                    <div className="p-4">
+
+                      <div className="flex gap-3 rounded-2xl bg-slate-50 p-4">
+
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600">
+                          ✓
+                        </div>
+
+                        <div>
+                          <p className="text-sm font-semibold text-slate-900">
+                            Booking terbaru
+                          </p>
+
+                          <p className="mt-1 text-xs leading-5 text-slate-500">
+                            Booking kamu dapat dilihat melalui halaman riwayat pemesanan.
+                          </p>
+                        </div>
+                      </div>
+
+                    </div>
+
+                    <Link
+                      href="/dashboard/riwayat"
+                      className="block border-t border-slate-100 bg-slate-50 px-5 py-3 text-center text-xs font-bold text-slate-700 transition hover:bg-slate-100"
                     >
-                      Keluar
-                    </button>
-                  </form>
-                </div>
-              </details>
+                      Lihat Riwayat
+                    </Link>
+                  </div>
+                </details>
+
+                {/* DIVIDER */}
+
+                <div className="hidden h-8 w-px bg-slate-200 sm:block" />
+
+                {/* PROFILE */}
+
+                <details className="group relative">
+                  <summary className="flex cursor-pointer list-none items-center gap-3 rounded-2xl p-1.5 transition hover:bg-slate-50 [&::-webkit-details-marker]:hidden">
+
+                    {user.image ? (
+                      <img
+                        src={user.image}
+                        alt={userName}
+                        className="h-10 w-10 rounded-xl object-cover ring-2 ring-slate-100"
+                      />
+                    ) : (
+                      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#07152f] to-[#1d3557] text-sm font-bold text-white">
+                        {avatarText}
+                      </div>
+                    )}
+
+                    <div className="hidden text-left sm:block">
+                      <p className="max-w-[170px] truncate text-sm font-bold text-slate-900">
+                        {userName}
+                      </p>
+
+                      <p className="mt-0.5 text-[11px] text-slate-400">
+                        Pelanggan
+                      </p>
+                    </div>
+
+                    <svg
+                      className="hidden text-slate-400 sm:block"
+                      width="15"
+                      height="15"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
+                      <path d="m6 9 6 6 6-6" />
+                    </svg>
+                  </summary>
+
+                  <div className="absolute right-0 top-14 z-50 w-72 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl shadow-slate-900/10">
+
+                    <div className="bg-gradient-to-br from-[#07152f] to-[#172b4d] p-5 text-white">
+
+                      <div className="flex items-center gap-3">
+
+                        {user.image ? (
+                          <img
+                            src={user.image}
+                            alt={userName}
+                            className="h-12 w-12 rounded-xl object-cover ring-2 ring-white/20"
+                          />
+                        ) : (
+                          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white text-lg font-bold text-[#07152f]">
+                            {avatarText}
+                          </div>
+                        )}
+
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-bold">
+                            {userName}
+                          </p>
+
+                          <p className="mt-1 truncate text-xs text-slate-300">
+                            {user.email}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="p-4">
+
+                      <div className="flex items-center gap-3 rounded-xl bg-emerald-50 p-3">
+                        <span className="h-2.5 w-2.5 rounded-full bg-emerald-500" />
+
+                        <div>
+                          <p className="text-xs font-semibold text-emerald-700">
+                            Akun Aktif
+                          </p>
+
+                          <p className="text-[10px] text-emerald-600">
+                            Status pelanggan aktif
+                          </p>
+                        </div>
+                      </div>
+
+                      <form
+                        action={logout}
+                        className="mt-3 border-t border-slate-100 pt-3"
+                      >
+                        <button
+                          type="submit"
+                          className="flex w-full items-center justify-center gap-2 rounded-xl bg-slate-950 px-4 py-3 text-xs font-bold text-white transition hover:bg-slate-800"
+                        >
+                          Keluar dari Akun
+                        </button>
+                      </form>
+                    </div>
+                  </div>
+                </details>
               </div>
             </div>
           </header>

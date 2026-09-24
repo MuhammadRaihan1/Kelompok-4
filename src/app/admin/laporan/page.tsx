@@ -963,10 +963,10 @@ export default async function AdminLaporanPage({
             SIDEBAR
         ================================================== */}
 
-        <aside className="hidden w-64 flex-col bg-slate-950 text-white lg:fixed lg:inset-y-0 lg:left-0 lg:z-30 lg:flex lg:h-screen">
+         <aside className="hidden w-64 flex-col bg-white text-[#143b01] shadow-lg lg:fixed lg:inset-y-0 lg:left-0 lg:z-30 lg:flex lg:h-screen">
 
           {/* LOGO */}
-          <div className="flex items-center gap-3 px-6 py-6 border-b border-slate-800">
+          <div className="flex items-center gap-3 border-b border-[#dcebd8] bg-white px-6 py-6">
             <img
               src="/logo2.jpg"
               alt="Logo Lapangan"
@@ -985,11 +985,10 @@ export default async function AdminLaporanPage({
           {/* NAVIGATION */}
           <nav className="flex-1 px-4 py-6">
             <div className="space-y-1">
-
               {/* DASHBOARD */}
                <Link
             href="/admin/dashboard"
-            className="mb-2 flex items-center gap-4 rounded-xl px-4 py-3.5 text-[13px] font-medium text-[#a6b5cf] transition hover:bg-[#111d31] hover:text-white"
+            className="mb-2 flex items-center gap-4 rounded-xl px-4 py-3.5 text-[13px] font-medium text-[#496744] transition hover:bg-[#e8f3e5] hover:text-[#184902]"
           >
             <MenuIcon type="dashboard" />
             <span>
@@ -1002,7 +1001,8 @@ export default async function AdminLaporanPage({
 
           <Link
             href="/admin/lapangan"
-            className="mb-2 flex items-center gap-4 rounded-xl px-4 py-3.5 text-[13px] font-medium text-[#a6b5cf] transition hover:bg-[#111d31] hover:text-white"
+            className="mb-2 flex items-center gap-4 rounded-xl px-4 py-3.5 text-[13px] font-medium text-[#496744] transition hover:bg-[#e8f3e5] hover:text-[#184902]"
+           
           >
 
             <MenuIcon type="field" />
@@ -1018,7 +1018,7 @@ export default async function AdminLaporanPage({
 
           <Link
             href="/admin/booking"
-            className="mb-2 flex items-center gap-4 rounded-xl px-4 py-3.5 text-[13px] font-medium text-[#a6b5cf] transition hover:bg-[#111d31] hover:text-white"
+            className="flex items-center gap-4 rounded-xl px-4 py-3.5 text-[13px] font-medium text-[#496744] transition hover:bg-[#e8f3e5] hover:text-[#184902]"
           >
 
             <MenuIcon type="booking" />
@@ -1034,7 +1034,7 @@ export default async function AdminLaporanPage({
 
           <Link
             href="/admin/customer"
-            className="mb-2 flex items-center gap-4 rounded-xl px-4 py-3.5 text-[13px] font-medium text-[#a6b5cf] transition hover:bg-[#111d31] hover:text-white"
+             className="flex items-center gap-4 rounded-xl px-4 py-3.5 text-[13px] font-medium text-[#496744] transition hover:bg-[#e8f3e5] hover:text-[#184902]"
           >
 
             <MenuIcon type="user" />
@@ -1050,7 +1050,7 @@ export default async function AdminLaporanPage({
 
           <Link
             href="/admin/laporan"
-            className="mb-2 flex items-center gap-4 rounded-xl bg-[#1d2a42] px-4 py-3.5 text-[13px] font-medium text-white transition"
+            className="mb-2 flex items-center gap-4 rounded-xl bg-[#184902] px-4 py-3.5 text-[13px] font-medium text-white transition"
           >
 
             <MenuIcon type="report" />
@@ -1065,11 +1065,11 @@ export default async function AdminLaporanPage({
 
         {/* BACK USER */}
 
-        <div className="absolute bottom-0 left-0 right-0 border-t border-white/10 p-5">
+        <div className="absolute bottom-0 left-0 right-0 border-t border-[#dcebd8] p-5">
 
           <Link
             href="/dashboard"
-            className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm text-[#91a2bf] transition hover:bg-[#111d31] hover:text-white"
+            className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm text-[#496744] transition hover:bg-[#e8f3e5] hover:text-[#184902]"
           >
 
             <span className="text-lg">
@@ -1082,8 +1082,8 @@ export default async function AdminLaporanPage({
 
           {/* USER SIDEBAR */}
 
-          <div className="p-4 border-t border-slate-800 text-center">
-            <p className="text-xs text-slate-500">
+          <div className="border-t border-[#dcebd8] p-4 text-center">
+            <p className="text-xs text-[#6b8565]">
               © {new Date().getFullYear()} Lapangin. Semua hak dilindungi.
             </p>
           </div>
@@ -1091,12 +1091,11 @@ export default async function AdminLaporanPage({
       </nav>
       </aside>
 
-
         {/* ==================================================
             MAIN
         ================================================== */}
 
-        <div className="min-w-0 lg:ml-64">
+        <div className="min-w-0 lg:ml-64 bg-[linear-gradient(135deg,#f8fbff_0%,#f4f7fc_48%,#eef5f1_100%)]">
 
 
           {/* TOPBAR */}
@@ -1104,17 +1103,17 @@ export default async function AdminLaporanPage({
           <header className="min-h-[6.5625rem] border-b border-[#e4e8ef] bg-white">
           <div className="flex min-h-[6.5625rem] flex-wrap items-center justify-between gap-4 px-4 py-4 sm:px-9">
 
-              <div>
+              <div className="rounded-2xl border border-[#e2eaf5] bg-white/70 px-4 py-3 shadow-sm sm:px-5">
 
-                <p className="text-xs font-medium text-slate-400">
-                  Admin Panel
-                </p>
+                  <p className="text-[12px] font-medium text-[#022d7e]">
+                    Admin Panel
+                  </p>
 
-                <h2 className="text-xl font-bold">
-                  Laporan
-                </h2>
+                  <h1 className="mt-1 text-[15px] font-bold leading-none tracking-tight text-[#07152f]">
+                    Dashboard
+                  </h1>
 
-              </div>
+            </div>
 
 
               <PrintButton />

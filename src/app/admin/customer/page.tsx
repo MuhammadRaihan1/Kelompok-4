@@ -552,22 +552,19 @@ export default async function AdminCustomerPage({
             SIDEBAR
         ================================================== */}
 
-        <aside className="hidden w-64 flex-col bg-slate-950 text-white lg:fixed lg:inset-y-0 lg:left-0 lg:z-30 lg:flex lg:h-screen">
+        <aside className="hidden w-64 flex-col bg-white text-[#143b01] shadow-lg lg:fixed lg:inset-y-0 lg:left-0 lg:z-30 lg:flex lg:h-screen">
 
           {/* LOGO */}
-
-          <div className="flex items-center gap-3 border-b border-slate-800 px-6 py-6">
+          <div className="flex items-center gap-3 border-b border-[#dcebd8] bg-white px-6 py-6">
             <img
               src="/logo2.jpg"
-              alt="Logo Lapangin"
-              className="h-10 w-10 rounded-xl object-contain bg-white"
+              alt="Logo Lapangan"
+              className="w-10 h-10 rounded-xl object-contain bg-white"
             />
-
             <div>
               <h1 className="text-lg font-bold tracking-tight">
                 Lapangin
               </h1>
-
               <p className="text-xs text-slate-500">
                 Booking Lapangan
               </p>
@@ -575,107 +572,137 @@ export default async function AdminCustomerPage({
           </div>
 
           {/* NAVIGATION */}
-
           <nav className="flex-1 px-4 py-6">
             <div className="space-y-1">
+              {/* DASHBOARD */}
+               <Link
+            href="/admin/dashboard"
+            className="mb-2 flex items-center gap-4 rounded-xl px-4 py-3.5 text-[13px] font-medium text-[#496744] transition hover:bg-[#e8f3e5] hover:text-[#184902]"
+          >
+            <MenuIcon type="dashboard" />
+            <span>
+              Dashboard
+            </span>
+          </Link>
 
-              <Link
-                href="/admin/dashboard"
-                className="mb-2 flex items-center gap-4 rounded-xl px-4 py-3.5 text-[13px] font-medium text-[#a6b5cf] transition hover:bg-[#111d31] hover:text-white"
-              >
-                <MenuIcon type="dashboard" />
-                <span>Dashboard</span>
-              </Link>
 
-              <Link
-                href="/admin/lapangan"
-                className="mb-2 flex items-center gap-4 rounded-xl px-4 py-3.5 text-[13px] font-medium text-[#a6b5cf] transition hover:bg-[#111d31] hover:text-white"
-              >
-                <MenuIcon type="field" />
-                <span>Lapangan</span>
-              </Link>
+          {/* LAPANGAN */}
 
-              <Link
-                href="/admin/booking"
-                className="mb-2 flex items-center gap-4 rounded-xl px-4 py-3.5 text-[13px] font-medium text-[#a6b5cf] transition hover:bg-[#111d31] hover:text-white"
-              >
-                <MenuIcon type="booking" />
-                <span>Riwayat Pemesanan</span>
-              </Link>
+          <Link
+            href="/admin/lapangan"
+            className="mb-2 flex items-center gap-4 rounded-xl px-4 py-3.5 text-[13px] font-medium text-[#496744] transition hover:bg-[#e8f3e5] hover:text-[#184902]"
+           
+          >
 
-              <Link
-                href="/admin/customer"
-                className="mb-2 flex items-center gap-4 rounded-xl bg-[#1d2a42] px-4 py-3.5 text-[13px] font-medium text-white transition"
-              >
-                <MenuIcon type="user" />
-                <span>Manajemen User</span>
-              </Link>
+            <MenuIcon type="field" />
 
-              <Link
-                href="/admin/laporan"
-                className="flex items-center gap-4 rounded-xl px-4 py-3.5 text-[13px] font-medium text-[#a6b5cf] transition hover:bg-[#111d31] hover:text-white"
-              >
-                <MenuIcon type="report" />
-                <span>Laporan Pendapatan</span>
-              </Link>
+            <span>
+              Lapangan
+            </span>
 
-            </div>
+          </Link>
 
-            {/* BOTTOM SIDEBAR */}
 
-            <div className="absolute bottom-0 left-0 right-0 border-t border-white/10 p-5">
+          {/* RIWAYAT */}
 
-              <Link
-                href="/dashboard"
-                className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm text-[#91a2bf] transition hover:bg-[#111d31] hover:text-white"
-              >
-                <span className="text-lg">👤</span>
-                Dashboard User
-              </Link>
+          <Link
+            href="/admin/booking"
+            className="flex items-center gap-4 rounded-xl px-4 py-3.5 text-[13px] font-medium text-[#496744] transition hover:bg-[#e8f3e5] hover:text-[#184902]"
+          >
 
-              <form action={logout}>
-                <button
-                  type="submit"
-                  className="mt-2 flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm text-[#91a2bf] transition hover:bg-red-500/10 hover:text-red-400"
-                >
-                  <Icon type="logout" />
-                  Keluar
-                </button>
-              </form>
+            <MenuIcon type="booking" />
 
-              <div className="mt-3 border-t border-slate-800 pt-4 text-center">
-                <p className="text-xs text-slate-500">
-                  © {new Date().getFullYear()} Lapangin.
-                </p>
-              </div>
+            <span>
+              Riwayat Pemesanan
+            </span>
 
-            </div>
-          </nav>
-        </aside>
+          </Link>
+
+
+          {/* USER */}
+
+          <Link
+            href="/admin/customer"
+             className="mb-2 flex items-center gap-4 rounded-xl bg-[#184902] px-4 py-3.5 text-[13px] font-medium text-white transition"
+          >
+
+            <MenuIcon type="user" />
+
+            <span>
+              Manajemen User
+            </span>
+
+          </Link>
+
+
+          {/* LAPORAN */}
+
+          <Link
+            href="/admin/laporan"
+            className="flex items-center gap-4 rounded-xl px-4 py-3.5 text-[13px] font-medium text-[#496744] transition hover:bg-[#e8f3e5] hover:text-[#184902]"
+          >
+
+            <MenuIcon type="report" />
+
+            <span>
+              Laporan Pendapatan
+            </span>
+
+          </Link>
+        </div>
+
+
+        {/* BACK USER */}
+
+        <div className="absolute bottom-0 left-0 right-0 border-t border-[#dcebd8] p-5">
+
+          <Link
+            href="/dashboard"
+            className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm text-[#496744] transition hover:bg-[#e8f3e5] hover:text-[#184902]"
+          >
+
+            <span className="text-lg">
+              👤
+            </span>
+            Dashboard User
+
+          </Link>
+        
+
+          {/* USER SIDEBAR */}
+
+          <div className="border-t border-[#dcebd8] p-4 text-center">
+            <p className="text-xs text-[#6b8565]">
+              © {new Date().getFullYear()} Lapangin. Semua hak dilindungi.
+            </p>
+          </div>
+        </div>
+      </nav>
+      </aside>
 
         {/* ==================================================
             MAIN
         ================================================== */}
 
-        <div className="min-w-0 lg:ml-64 flex-1">
+        <div className="min-w-0 lg:ml-64 bg-[linear-gradient(135deg,#f8fbff_0%,#f4f7fc_48%,#eef5f1_100%)]">
 
-          {/* ==================================================
-              TOPBAR
-          ================================================== */}
+        {/* HEADER */}
 
-          <header className="min-h-[6.5625rem] border-b border-[#e4e8ef] bg-white">
+        <header className="min-h-[6.5625rem] border-b border-[#e4e8ef] bg-white">
 
-            <div className="flex min-h-[6.5625rem] flex-wrap items-center justify-between gap-4 px-4 py-4 sm:px-9">
+          <div className="flex min-h-[6.5625rem] flex-wrap items-center justify-between gap-4 px-4 py-4 sm:px-9">
 
-              <div>
-                <p className="text-xs font-medium text-slate-400">
-                  Admin Panel
-                </p>
+            <div className="rounded-2xl border border-[#e2eaf5] bg-white/70 px-4 py-3 shadow-sm sm:px-5">
 
-                <h2 className="text-xl font-bold">
-                  Manajemen User
-                </h2>
-              </div>
+                  <p className="text-[12px] font-medium text-[#022d7e]">
+                    Admin Panel
+                  </p>
+
+                  <h1 className="mt-1 text-[15px] font-bold leading-none tracking-tight text-[#07152f]">
+                    Dashboard
+                  </h1>
+
+            </div>
 
               {/* RIGHT TOPBAR */}
 
@@ -720,7 +747,7 @@ export default async function AdminCustomerPage({
 
                   {/* DROPDOWN */}
 
-                  <div className="absolute right-0 top-14 z-50 w-[380px] overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl">
+                  <div className="absolute right-0 top-14 z-1 w-[10000px] overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl">
 
                     <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
 
@@ -907,7 +934,7 @@ export default async function AdminCustomerPage({
 
                 <div className="flex items-center gap-4">
 
-                  <div className="h-14 w-14 shrink-0 overflow-hidden rounded-full bg-slate-200">
+                  <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full bg-slate-200">
 
                     {adminUser.image ? (
 
@@ -961,9 +988,10 @@ export default async function AdminCustomerPage({
 
               <div>
 
-                <p className="mb-2 text-sm font-semibold text-[#8da0bd]">
-                  Pengguna Sistem
-                </p>
+                <p className="flex items-center gap-2 text-[14px] font-semibold text-[#3568b8]">
+                    <span className="h-2 w-2 rounded-full bg-[#35b878] shadow-[0_0_0_4px_#e5f8ed]" />
+                Pengguna Sistem
+              </p>
 
                 <h1 className="text-3xl font-bold text-slate-900">
                   Manajemen User
@@ -1216,7 +1244,7 @@ export default async function AdminCustomerPage({
 
                 <button
                   type="submit"
-                  className="rounded-xl bg-[#020817] px-6 py-3.5 text-sm font-bold text-white transition hover:bg-slate-800"
+                  className="rounded-xl bg-[#053728] px-6 py-3.5 text-sm font-bold text-white transition hover:bg-[#15493f]"
                 >
                   Cari User
                 </button>

@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import Link from "next/link";
+import Image from "next/image";
 
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
@@ -226,6 +227,108 @@ function Icon({
   }
 
   return null;
+}
+
+function MenuIcon({
+  type,
+}: {
+  type:
+    | "dashboard"
+    | "field"
+    | "booking"
+    | "user"
+    | "report";
+}) {
+  if (type === "dashboard") {
+    return (
+      <svg
+        width="21"
+        height="21"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+      >
+        <rect x="3" y="3" width="7" height="7" rx="1" />
+        <rect x="14" y="3" width="7" height="7" rx="1" />
+        <rect x="3" y="14" width="7" height="7" rx="1" />
+        <rect x="14" y="14" width="7" height="7" rx="1" />
+      </svg>
+    );
+  }
+  if (type === "field") {
+    return (
+      <svg
+        width="21"
+        height="21"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+      >
+        <rect x="3" y="4" width="18" height="16" rx="1" />
+        <path d="M8 4v16" />
+        <path d="M16 4v16" />
+        <path d="M3 9h5" />
+        <path d="M16 9h5" />
+        <path d="M3 15h5" />
+        <path d="M16 15h5" />
+      </svg>
+    );
+  }
+
+  if (type === "booking") {
+    return (
+      <svg
+        width="21"
+        height="21"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+      >
+        <rect x="3" y="4" width="18" height="17" rx="2" />
+        <path d="M16 2v4" />
+        <path d="M8 2v4" />
+        <path d="M3 10h18" />
+        <path d="M8 14h.01" />
+        <path d="M12 14h.01" />
+        <path d="M16 14h.01" />
+      </svg>
+    );
+  }
+
+  if (type === "user") {
+    return (
+      <svg
+        width="21"
+        height="21"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+      >
+        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+        <circle cx="9" cy="7" r="4" />
+        <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+      </svg>
+    );
+  }
+
+  return (
+    <svg
+      width="21"
+      height="21"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+    >
+      <path d="M3 3v18h18" />
+      <path d="m7 16 4-5 3 3 5-7" />
+    </svg>
+  );
 }
 
 // ============================================================
@@ -476,7 +579,7 @@ export default async function AdminDashboard() {
   // ==========================================================
 
   return (
-    <div className="min-h-screen bg-[#f7f9fc] text-[#07152f]">
+    <div className="min-h-screen bg-[#adaaaa] text-[#eef0f3]">
 
       <div className="flex min-h-screen">
 
@@ -484,197 +587,148 @@ export default async function AdminDashboard() {
             SIDEBAR
         ==================================================== */}
 
-        <aside className="hidden w-[275px] shrink-0 border-r border-[#17213d] bg-[#02091f] lg:flex lg:flex-col">
+        <aside className="hidden w-64 flex-col bg-white text-[#143b01] shadow-lg lg:fixed lg:inset-y-0 lg:left-0 lg:z-30 lg:flex lg:h-screen">
 
           {/* LOGO */}
-
-          <div className="flex h-[92px] items-center border-b border-white/10 px-7">
-
-            <Link
-              href="/admin/dashboard"
-              className="flex items-center gap-3"
-            >
-
-              {/* LOGO ICON */}
-
-              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#f5f0df] shadow-sm">
-
-                <svg
-                  width="28"
-                  height="28"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="#07152f"
-                  strokeWidth="1.6"
-                >
-                  <rect
-                    x="5"
-                    y="3"
-                    width="14"
-                    height="18"
-                    rx="2"
-                  />
-
-                  <path d="M8 7h8" />
-                  <path d="M8 11h8" />
-                  <path d="M8 15h3" />
-                  <path d="M14 15h2" />
-
-                  <path d="M3 8h2" />
-                  <path d="M19 8h2" />
-                  <path d="M3 16h2" />
-                  <path d="M19 16h2" />
-                </svg>
-
-              </div>
-
-              {/* BRAND */}
-
-              <div>
-
-                <p className="text-[19px] font-extrabold tracking-tight text-white">
-                  Lapangin
-                </p>
-
-                <p className="text-[12px] text-[#91a4c8]">
-                  Booking Lapangan
-                </p>
-
-              </div>
-
-            </Link>
-
+          <div className="flex items-center gap-3 border-b border-[#dcebd8] bg-white px-6 py-6">
+            <Image
+              src="/logo2.jpg"
+              alt="Logo Lapangan"
+              width={40}
+              height={40}
+              className="w-10 h-10 rounded-xl object-contain bg-white"
+            />
+            <div>
+              <h1 className="text-lg font-bold tracking-tight">
+                Lapangin
+              </h1>
+              <p className="text-xs text-[#6b8565]">
+                Booking Lapangan
+              </p>
+            </div>
           </div>
 
           {/* NAVIGATION */}
-
-          <div className="flex-1 px-[14px] py-7">
-
-            <nav className="space-y-2">
-
+          <nav className="flex-1 px-4 py-6">
+            <div className="space-y-1">
               {/* DASHBOARD */}
+               <Link
+            href="/admin/dashboard"
+            className="mb-2 flex items-center gap-4 rounded-xl bg-[#184902] px-4 py-3.5 text-[13px] font-medium text-white transition"
+          >
+            <MenuIcon type="dashboard" />
+            <span>
+              Dashboard
+            </span>
+          </Link>
 
-              <Link
-                href="/admin/dashboard"
-                className="flex h-[54px] items-center gap-4 rounded-[14px] bg-[#1d2b48] px-5 text-[14px] font-medium text-white"
-              >
 
-                <Icon type="dashboard" />
+          {/* LAPANGAN */}
 
-                <span>
-                  Dashboard
-                </span>
+          <Link
+            href="/admin/lapangan"
+            className="mb-2 flex items-center gap-4 rounded-xl px-4 py-3.5 text-[13px] font-medium text-[#496744] transition hover:bg-[#e8f3e5] hover:text-[#184902]"
+          >
 
-              </Link>
+            <MenuIcon type="field" />
 
-              {/* LAPANGAN */}
+            <span>
+              Lapangan
+            </span>
 
-              <Link
-                href="/admin/lapangan"
-                className="flex h-[54px] items-center gap-4 rounded-[14px] px-5 text-[14px] font-medium text-[#b9c7df] transition hover:bg-white/5 hover:text-white"
-              >
+          </Link>
 
-                <Icon type="field" />
 
-                <span>
-                  Lapangan
-                </span>
+          {/* RIWAYAT */}
 
-              </Link>
+          <Link
+            href="/admin/booking"
+            className="mb-2 flex items-center gap-4 rounded-xl px-4 py-3.5 text-[13px] font-medium text-[#496744] transition hover:bg-[#e8f3e5] hover:text-[#184902]"
+          >
 
-              {/* RIWAYAT */}
+            <MenuIcon type="booking" />
 
-              <Link
-                href="/admin/booking"
-                className="flex h-[54px] items-center gap-4 rounded-[14px] px-5 text-[14px] font-medium text-[#b9c7df] transition hover:bg-white/5 hover:text-white"
-              >
+            <span>
+              Riwayat Pemesanan
+            </span>
 
-                <Icon type="booking" />
+          </Link>
 
-                <span>
-                  Riwayat Pemesanan
-                </span>
 
-              </Link>
+          {/* USER */}
 
-              {/* USER */}
+          <Link
+            href="/admin/customer"
+            className="mb-2 flex items-center gap-4 rounded-xl px-4 py-3.5 text-[13px] font-medium text-[#496744] transition hover:bg-[#e8f3e5] hover:text-[#184902]"
+          >
 
-              <Link
-                href="/admin/customer"
-                className="flex h-[54px] items-center gap-4 rounded-[14px] px-5 text-[14px] font-medium text-[#b9c7df] transition hover:bg-white/5 hover:text-white"
-              >
+            <MenuIcon type="user" />
 
-                <Icon type="users" />
+            <span>
+              Manajemen User
+            </span>
 
-                <span>
-                  Manajemen User
-                </span>
+          </Link>
 
-              </Link>
 
-              {/* LAPORAN */}
+          {/* LAPORAN */}
 
-              <Link
-                href="/admin/laporan"
-                className="flex h-[54px] items-center gap-4 rounded-[14px] px-5 text-[14px] font-medium text-[#b9c7df] transition hover:bg-white/5 hover:text-white"
-              >
+          <Link
+            href="/admin/laporan"
+            className="flex items-center gap-4 rounded-xl px-4 py-3.5 text-[13px] font-medium text-[#496744] transition hover:bg-[#e8f3e5] hover:text-[#184902]"
+          >
 
-                <Icon type="report" />
+            <MenuIcon type="report" />
 
-                <span>
-                  Laporan Pendapatan
-                </span>
+            <span>
+              Laporan Pendapatan
+            </span>
 
-              </Link>
+          </Link>
+        </div>
 
-            </nav>
 
+        {/* BACK USER */}
+
+        <div className="absolute bottom-0 left-0 right-0 border-t border-[#dcebd8] p-5">
+
+          <Link
+            href="/dashboard"
+            className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm text-[#496744] transition hover:bg-[#e8f3e5] hover:text-[#184902]"
+          >
+
+            <span className="text-lg">
+              👤
+            </span>
+            Dashboard User
+
+          </Link>
+        
+
+          {/* USER SIDEBAR */}
+
+          <div className="border-t border-[#dcebd8] p-4 text-center">
+            <p className="text-xs text-[#6b8565]">
+              © {new Date().getFullYear()} Lapangin. Semua hak dilindungi.
+            </p>
           </div>
-
-          {/* BOTTOM SIDEBAR */}
-
-          <div className="border-t border-white/10 px-[18px] py-5">
-
-            <Link
-              href="/dashboard"
-              className="flex items-center gap-4 rounded-xl px-4 py-3 text-[14px] font-medium text-[#b9c7df] transition hover:bg-white/5 hover:text-white"
-            >
-
-              <Icon type="user" />
-
-              <span>
-                Dashboard User
-              </span>
-
-            </Link>
-
-            <div className="mt-4 border-t border-white/10 pt-4">
-
-              <p className="text-center text-[12px] leading-5 text-[#7184a8]">
-                © {new Date().getFullYear()} Lapangin.
-                <br />
-                Semua hak dilindungi.
-              </p>
-
-            </div>
-
-          </div>
-
-        </aside>
+        </div>
+      </nav>
+      </aside>
 
         {/* ====================================================
             MAIN
         ==================================================== */}
 
-        <main className="min-w-0 flex-1">
+        <main className="min-w-0 w-full bg-[linear-gradient(135deg,#f8fbff_0%,#f4f7fc_48%,#eef5f1_100%)] lg:ml-64">
 
           {/* ==================================================
               HEADER
           ================================================== */}
 
-          <header className="sticky top-0 z-40 h-[96px] border-b border-[#e2e7ee] bg-white">
+          <header className="relative z-20 flex min-h-24 w-full items-center justify-between border-b border-white/70 bg-white/90 px-5 py-5 shadow-[0_8px_30px_rgba(15,23,42,0.06)] backdrop-blur-md md:px-8">
 
-            <div className="flex h-full items-center justify-between px-5 sm:px-8 lg:px-9">
+            <div className="flex h-full w-full items-center justify-between px-0 sm:px-0 lg:px-0">
 
               {/* LEFT */}
 
@@ -736,13 +790,13 @@ export default async function AdminDashboard() {
 
                 </details>
 
-                <div>
+                <div className="rounded-2xl border border-[#e2eaf5] bg-white/70 px-4 py-3 shadow-sm sm:px-5">
 
-                  <p className="text-[14px] font-medium text-[#8294b5]">
+                  <p className="text-[12px] font-medium text-[#022d7e]">
                     Admin Panel
                   </p>
 
-                  <h1 className="mt-1 text-[27px] font-bold leading-none tracking-tight text-[#07152f]">
+                  <h1 className="mt-1 text-[15px] font-bold leading-none tracking-tight text-[#07152f]">
                     Dashboard
                   </h1>
 
@@ -767,9 +821,12 @@ export default async function AdminDashboard() {
                   <summary className="flex cursor-pointer list-none items-center gap-3">
 
                     {user.image ? (
-                      <img
+                        <Image
                         src={user.image}
                         alt={namaAdmin}
+                          width={44}
+                          height={44}
+                          unoptimized
                         className="h-11 w-11 rounded-full object-cover"
                       />
                     ) : (
@@ -811,9 +868,12 @@ export default async function AdminDashboard() {
                       <div className="flex items-center gap-3">
 
                         {user.image ? (
-                          <img
+                          <Image
                             src={user.image}
                             alt={namaAdmin}
+                            width={44}
+                            height={44}
+                            unoptimized
                             className="h-11 w-11 rounded-full object-cover"
                           />
                         ) : (
@@ -841,7 +901,7 @@ export default async function AdminDashboard() {
                     <div className="p-2">
 
                       <Link
-                        href="/admin/customer"
+                        href=""
                         className="flex items-center gap-3 rounded-xl px-3 py-3 text-sm text-slate-600 transition hover:bg-slate-50"
                       >
                         <Icon type="user" />
@@ -884,7 +944,8 @@ export default async function AdminDashboard() {
 
             <section className="mb-8">
 
-              <p className="text-[14px] font-medium text-[#8294b5]">
+                  <p className="flex items-center gap-2 text-[14px] font-semibold text-[#3568b8]">
+                    <span className="h-2 w-2 rounded-full bg-[#35b878] shadow-[0_0_0_4px_#e5f8ed]" />
                 Ringkasan
               </p>
 
@@ -892,7 +953,7 @@ export default async function AdminDashboard() {
                 Selamat Datang, {namaAdmin}
               </h2>
 
-              <p className="mt-2 text-[15px] text-[#8294b5]">
+              <p className="mt-2 text-[15px] text-[#03173d]">
                 Pantau aktivitas pemesanan dan operasional
                 Lapangin dari halaman dashboard.
               </p>
@@ -907,7 +968,7 @@ export default async function AdminDashboard() {
 
               {/* TOTAL USER */}
 
-              <div className="rounded-[18px] border border-[#dfe5ed] bg-white p-6 shadow-[0_2px_8px_rgba(15,23,42,0.03)]">
+              <div className="group rounded-[18px] border border-[#dfe5ed] bg-white p-6 shadow-[0_2px_8px_rgba(15,23,42,0.03)] transition duration-300 hover:-translate-y-1 hover:border-[#b9cfee] hover:shadow-[0_14px_30px_rgba(53,104,184,0.12)]">
 
                 <div className="flex items-start justify-between">
 
@@ -937,7 +998,7 @@ export default async function AdminDashboard() {
 
               {/* LAPANGAN */}
 
-              <div className="rounded-[18px] border border-[#dfe5ed] bg-white p-6 shadow-[0_2px_8px_rgba(15,23,42,0.03)]">
+              <div className="group rounded-[18px] border border-[#dfe5ed] bg-white p-6 shadow-[0_2px_8px_rgba(15,23,42,0.03)] transition duration-300 hover:-translate-y-1 hover:border-[#b9cfee] hover:shadow-[0_14px_30px_rgba(53,104,184,0.12)]">
 
                 <div className="flex items-start justify-between">
 
@@ -967,7 +1028,7 @@ export default async function AdminDashboard() {
 
               {/* BOOKING */}
 
-              <div className="rounded-[18px] border border-[#dfe5ed] bg-white p-6 shadow-[0_2px_8px_rgba(15,23,42,0.03)]">
+              <div className="group rounded-[18px] border border-[#dfe5ed] bg-white p-6 shadow-[0_2px_8px_rgba(15,23,42,0.03)] transition duration-300 hover:-translate-y-1 hover:border-[#b9cfee] hover:shadow-[0_14px_30px_rgba(53,104,184,0.12)]">
 
                 <div className="flex items-start justify-between">
 
@@ -997,7 +1058,7 @@ export default async function AdminDashboard() {
 
               {/* PENDAPATAN */}
 
-              <div className="rounded-[18px] border border-[#dfe5ed] bg-white p-6 shadow-[0_2px_8px_rgba(15,23,42,0.03)]">
+              <div className="group rounded-[18px] border border-[#dfe5ed] bg-white p-6 shadow-[0_2px_8px_rgba(15,23,42,0.03)] transition duration-300 hover:-translate-y-1 hover:border-[#b9cfee] hover:shadow-[0_14px_30px_rgba(53,104,184,0.12)]">
 
                 <div className="flex items-start justify-between">
 
@@ -1382,7 +1443,7 @@ export default async function AdminDashboard() {
                   Akses Cepat
                 </h2>
 
-                <p className="mt-1 text-[13px] text-[#8294b5]">
+                <p className="mt-1 text-[13px] text-[#032157]">
                   Kelola sistem Lapangin dengan cepat.
                 </p>
 
@@ -1506,9 +1567,9 @@ export default async function AdminDashboard() {
                 FOOTER
             ================================================= */}
 
-            <footer className="mt-10 border-t border-[#e1e6ed] py-6">
+            <footer className="mt-10 border-t border-[#13c144] py-6">
 
-              <div className="flex flex-col justify-between gap-2 text-[12px] text-[#94a3b8] sm:flex-row">
+              <div className="flex flex-col justify-between gap-2 text-[12px] text-[#021e46] sm:flex-row">
 
                 <p>
                   © {new Date().getFullYear()} Lapangin.
