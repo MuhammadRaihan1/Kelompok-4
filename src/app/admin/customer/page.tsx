@@ -6,7 +6,6 @@ import { revalidatePath } from "next/cache";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
-
 // ============================================================
 // FORMAT TANGGAL
 // ============================================================
@@ -20,11 +19,6 @@ function formatTanggal(date: Date) {
   }).format(date);
 }
 
-
-// ============================================================
-// FORMAT TANGGAL LENGKAP
-// ============================================================
-
 function formatTanggalLengkap(date: Date) {
   return new Intl.DateTimeFormat("id-ID", {
     day: "2-digit",
@@ -33,7 +27,6 @@ function formatTanggalLengkap(date: Date) {
     timeZone: "Asia/Jakarta",
   }).format(date);
 }
-
 
 // ============================================================
 // ICON
@@ -197,6 +190,11 @@ function Icon({
     </svg>
   );
 }
+
+// ============================================================
+// MENU ICON
+// ============================================================
+
 function MenuIcon({
   type,
 }: {
@@ -300,7 +298,6 @@ function MenuIcon({
   );
 }
 
-
 // ============================================================
 // PAGE
 // ============================================================
@@ -315,70 +312,51 @@ export default async function AdminCustomerPage({
     error?: string;
   }>;
 }) {
-  // ==========================================================
-  // PARAMETER
-  // ==========================================================
-
   const params = await searchParams;
 
-  const search =
-    params.search?.trim() || "";
-
-  const role =
-    params.role || "ALL";
-
+  const search = params.search?.trim() || "";
+  const role = params.role || "ALL";
 
   // ==========================================================
-  // AUTH ADMIN
+  // AUTH
   // ==========================================================
 
-  const requestHeaders =
-    await headers();
+  const requestHeaders = await headers();
 
-  const session =
-    await auth.api.getSession({
-      headers: requestHeaders,
-    });
+  const session = await auth.api.getSession({
+    headers: requestHeaders,
+  });
 
   if (!session) {
     redirect("/admin/login");
   }
 
-
   // ==========================================================
-  // CEK ROLE DARI DATABASE
+  // ADMIN USER
   // ==========================================================
 
-  const adminUser =
-    await prisma.user.findUnique({
-      where: {
-        id: session.user.id,
-      },
+  const adminUser = await prisma.user.findUnique({
+    where: {
+      id: session.user.id,
+    },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      image: true,
+      role: true,
+    },
+  });
 
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        image: true,
-        role: true,
-      },
-    });
-
-
-  if (
-    !adminUser ||
-    adminUser.role !== "ADMIN"
-  ) {
+  if (!adminUser || adminUser.role !== "ADMIN") {
     redirect("/dashboard");
   }
 
-
   // ==========================================================
-  // FILTER USER
+  // FILTER
   // ==========================================================
 
   const where: any = {};
-
 
   if (search) {
     where.OR = [
@@ -395,186 +373,126 @@ export default async function AdminCustomerPage({
     ];
   }
 
-
-  if (
-    role === "USER" ||
-    role === "ADMIN"
-  ) {
+  if (role === "USER" || role === "ADMIN") {
     where.role = role;
   }
 
-
   // ==========================================================
-  // AMBIL USER
+  // USER
   // ==========================================================
 
-  const users =
-    await prisma.user.findMany({
-      where,
-
-      orderBy: {
-        createdAt: "desc",
-      },
-
-      include: {
-        _count: {
-          select: {
-            sessions: true,
-          },
+  const users = await prisma.user.findMany({
+    where,
+    orderBy: {
+      createdAt: "desc",
+    },
+    include: {
+      _count: {
+        select: {
+          sessions: true,
         },
       },
-    });
-
+    },
+  });
 
   // ==========================================================
-  // CUSTOMER DATA
+  // CUSTOMER
   // ==========================================================
 
-  const customers =
-    await prisma.customer.findMany({
-      select: {
-        id: true,
-        userId: true,
-        username: true,
-        name: true,
-        email: true,
-
-        _count: {
-          select: {
-            bookings: true,
-          },
+  const customers = await prisma.customer.findMany({
+    select: {
+      id: true,
+      userId: true,
+      username: true,
+      name: true,
+      email: true,
+      _count: {
+        select: {
+          bookings: true,
         },
       },
-    });
-
+    },
+  });
 
   // ==========================================================
-  // MAP CUSTOMER
+  // CUSTOMER MAP
   // ==========================================================
 
-  const customerMap =
-    new Map(
-      customers.map(
-        (customer) => [
-          customer.userId,
-          customer,
-        ]
-      )
-    );
-
+  const customerMap = new Map(
+    customers.map((customer) => [
+      customer.userId,
+      customer,
+    ])
+  );
 
   // ==========================================================
   // STATISTIK
   // ==========================================================
 
-  const totalUsers =
-    await prisma.user.count();
+  const totalUsers = await prisma.user.count();
 
+  const totalAdmin = await prisma.user.count({
+    where: {
+      role: "ADMIN",
+    },
+  });
 
-  const totalAdmin =
-    await prisma.user.count({
-      where: {
-        role: "ADMIN",
-      },
-    });
+  const totalCustomer = await prisma.user.count({
+    where: {
+      role: "USER",
+    },
+  });
 
-
-  const totalCustomer =
-    await prisma.user.count({
-      where: {
-        role: "USER",
-      },
-    });
-
-
-  const totalBookings =
-    await prisma.booking.count();
-
+  const totalBookings = await prisma.booking.count();
 
   // ==========================================================
-  // SERVER ACTION UBAH ROLE
+  // UPDATE ROLE
   // ==========================================================
 
-  async function updateRole(
-    formData: FormData
-  ) {
+  async function updateRole(formData: FormData) {
     "use server";
 
+    const currentHeaders = await headers();
 
-    // ========================================================
-    // AUTH
-    // ========================================================
-
-    const currentHeaders =
-      await headers();
-
-    const currentSession =
-      await auth.api.getSession({
-        headers: currentHeaders,
-      });
-
+    const currentSession = await auth.api.getSession({
+      headers: currentHeaders,
+    });
 
     if (!currentSession) {
       redirect("/admin/login");
     }
 
+    const currentAdmin = await prisma.user.findUnique({
+      where: {
+        id: currentSession.user.id,
+      },
+      select: {
+        role: true,
+      },
+    });
 
-    // ========================================================
-    // CEK ADMIN
-    // ========================================================
-
-    const currentAdmin =
-      await prisma.user.findUnique({
-        where: {
-          id: currentSession.user.id,
-        },
-
-        select: {
-          role: true,
-        },
-      });
-
-
-    if (
-      !currentAdmin ||
-      currentAdmin.role !== "ADMIN"
-    ) {
+    if (!currentAdmin || currentAdmin.role !== "ADMIN") {
       redirect("/dashboard");
     }
 
+    const userId = formData
+      .get("userId")
+      ?.toString();
 
-    // ========================================================
-    // DATA FORM
-    // ========================================================
-
-    const userId =
-      formData
-        .get("userId")
-        ?.toString();
-
-    const newRole =
-      formData
-        .get("role")
-        ?.toString();
-
+    const newRole = formData
+      .get("role")
+      ?.toString();
 
     if (
       !userId ||
-      (
-        newRole !== "USER" &&
-        newRole !== "ADMIN"
-      )
+      (newRole !== "USER" && newRole !== "ADMIN")
     ) {
       redirect(
         "/admin/customer?error=Data%20role%20tidak%20valid"
       );
     }
 
-
-    // ========================================================
-    // CEGAH ADMIN MENURUNKAN DIRINYA SENDIRI
-    // ========================================================
-
+    // Jangan izinkan admin menurunkan role dirinya sendiri
     if (
       userId === currentSession.user.id &&
       newRole !== "ADMIN"
@@ -584,39 +502,21 @@ export default async function AdminCustomerPage({
       );
     }
 
-
-    // ========================================================
-    // UPDATE ROLE
-    // ========================================================
-
     await prisma.user.update({
       where: {
         id: userId,
       },
-
       data: {
-        role:
-          newRole as
-            | "USER"
-            | "ADMIN",
+        role: newRole as "USER" | "ADMIN",
       },
     });
 
-
-    // ========================================================
-    // REFRESH
-    // ========================================================
-
-    revalidatePath(
-      "/admin/customer"
-    );
-
+    revalidatePath("/admin/customer");
 
     redirect(
       "/admin/customer?success=Role%20user%20berhasil%20diperbarui"
     );
   }
-
 
   // ==========================================================
   // LOGOUT
@@ -625,13 +525,11 @@ export default async function AdminCustomerPage({
   async function logout() {
     "use server";
 
-    const currentHeaders =
-      await headers();
+    const currentHeaders = await headers();
 
-    const currentSession =
-      await auth.api.getSession({
-        headers: currentHeaders,
-      });
+    const currentSession = await auth.api.getSession({
+      headers: currentHeaders,
+    });
 
     if (currentSession) {
       await auth.api.signOut({
@@ -642,34 +540,34 @@ export default async function AdminCustomerPage({
     redirect("/admin/login");
   }
 
-
   // ==========================================================
   // RETURN
   // ==========================================================
 
   return (
     <main className="min-h-screen bg-[#f5f7fa] text-[#0d1b35]">
-
       <div className="flex min-h-screen">
-
 
         {/* ==================================================
             SIDEBAR
         ================================================== */}
 
-       <aside className="hidden w-64 flex-col bg-slate-950 text-white lg:fixed lg:inset-y-0 lg:left-0 lg:z-30 lg:flex lg:h-screen">
+        <aside className="hidden w-64 flex-col bg-slate-950 text-white lg:fixed lg:inset-y-0 lg:left-0 lg:z-30 lg:flex lg:h-screen">
 
           {/* LOGO */}
-          <div className="flex items-center gap-3 px-6 py-6 border-b border-slate-800">
+
+          <div className="flex items-center gap-3 border-b border-slate-800 px-6 py-6">
             <img
               src="/logo2.jpg"
-              alt="Logo Lapangan"
-              className="w-10 h-10 rounded-xl object-contain bg-white"
+              alt="Logo Lapangin"
+              className="h-10 w-10 rounded-xl object-contain bg-white"
             />
+
             <div>
               <h1 className="text-lg font-bold tracking-tight">
                 Lapangin
               </h1>
+
               <p className="text-xs text-slate-500">
                 Booking Lapangan
               </p>
@@ -677,130 +575,99 @@ export default async function AdminCustomerPage({
           </div>
 
           {/* NAVIGATION */}
+
           <nav className="flex-1 px-4 py-6">
             <div className="space-y-1">
 
-              {/* DASHBOARD */}
-               <Link
-            href="/admin/dashboard"
-            className="mb-2 flex items-center gap-4 rounded-xl px-4 py-3.5 text-[13px] font-medium text-[#a6b5cf] transition hover:bg-[#111d31] hover:text-white"
-          >
-            <MenuIcon type="dashboard" />
-            <span>
-              Dashboard
-            </span>
-          </Link>
+              <Link
+                href="/admin/dashboard"
+                className="mb-2 flex items-center gap-4 rounded-xl px-4 py-3.5 text-[13px] font-medium text-[#a6b5cf] transition hover:bg-[#111d31] hover:text-white"
+              >
+                <MenuIcon type="dashboard" />
+                <span>Dashboard</span>
+              </Link>
 
+              <Link
+                href="/admin/lapangan"
+                className="mb-2 flex items-center gap-4 rounded-xl px-4 py-3.5 text-[13px] font-medium text-[#a6b5cf] transition hover:bg-[#111d31] hover:text-white"
+              >
+                <MenuIcon type="field" />
+                <span>Lapangan</span>
+              </Link>
 
-          {/* LAPANGAN */}
+              <Link
+                href="/admin/booking"
+                className="mb-2 flex items-center gap-4 rounded-xl px-4 py-3.5 text-[13px] font-medium text-[#a6b5cf] transition hover:bg-[#111d31] hover:text-white"
+              >
+                <MenuIcon type="booking" />
+                <span>Riwayat Pemesanan</span>
+              </Link>
 
-          <Link
-            href="/admin/lapangan"
-            className="mb-2 flex items-center gap-4 rounded-xl px-4 py-3.5 text-[13px] font-medium text-[#a6b5cf] transition hover:bg-[#111d31] hover:text-white"
-          >
+              <Link
+                href="/admin/customer"
+                className="mb-2 flex items-center gap-4 rounded-xl bg-[#1d2a42] px-4 py-3.5 text-[13px] font-medium text-white transition"
+              >
+                <MenuIcon type="user" />
+                <span>Manajemen User</span>
+              </Link>
 
-            <MenuIcon type="field" />
+              <Link
+                href="/admin/laporan"
+                className="flex items-center gap-4 rounded-xl px-4 py-3.5 text-[13px] font-medium text-[#a6b5cf] transition hover:bg-[#111d31] hover:text-white"
+              >
+                <MenuIcon type="report" />
+                <span>Laporan Pendapatan</span>
+              </Link>
 
-            <span>
-              Lapangan
-            </span>
+            </div>
 
-          </Link>
+            {/* BOTTOM SIDEBAR */}
 
+            <div className="absolute bottom-0 left-0 right-0 border-t border-white/10 p-5">
 
-          {/* RIWAYAT */}
+              <Link
+                href="/dashboard"
+                className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm text-[#91a2bf] transition hover:bg-[#111d31] hover:text-white"
+              >
+                <span className="text-lg">👤</span>
+                Dashboard User
+              </Link>
 
-          <Link
-            href="/admin/booking"
-            className="mb-2 flex items-center gap-4 rounded-xl px-4 py-3.5 text-[13px] font-medium text-[#a6b5cf] transition hover:bg-[#111d31] hover:text-white"
-          >
+              <form action={logout}>
+                <button
+                  type="submit"
+                  className="mt-2 flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm text-[#91a2bf] transition hover:bg-red-500/10 hover:text-red-400"
+                >
+                  <Icon type="logout" />
+                  Keluar
+                </button>
+              </form>
 
-            <MenuIcon type="booking" />
+              <div className="mt-3 border-t border-slate-800 pt-4 text-center">
+                <p className="text-xs text-slate-500">
+                  © {new Date().getFullYear()} Lapangin.
+                </p>
+              </div>
 
-            <span>
-              Riwayat Pemesanan
-            </span>
-
-          </Link>
-
-
-          {/* USER */}
-
-          <Link
-            href="/admin/customer"
-            className="mb-2 flex items-center gap-4 rounded-xl bg-[#1d2a42] px-4 py-3.5 text-[13px] font-medium text-white transition"
-          >
-
-            <MenuIcon type="user" />
-
-            <span>
-              Manajemen User
-            </span>
-
-          </Link>
-
-
-          {/* LAPORAN */}
-
-          <Link
-            href="/admin/laporan"
-            className="flex items-center gap-4 rounded-xl px-4 py-3.5 text-[13px] font-medium text-[#a6b5cf] transition hover:bg-[#111d31] hover:text-white"
-          >
-
-            <MenuIcon type="report" />
-
-            <span>
-              Laporan Pendapatan
-            </span>
-
-          </Link>
-        </div>
-
-
-        {/* BACK USER */}
-
-        <div className="absolute bottom-0 left-0 right-0 border-t border-white/10 p-5">
-
-          <Link
-            href="/dashboard"
-            className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm text-[#91a2bf] transition hover:bg-[#111d31] hover:text-white"
-          >
-
-            <span className="text-lg">
-              👤
-            </span>
-            Dashboard User
-
-          </Link>
-        
-
-          {/* USER SIDEBAR */}
-
-          <div className="p-4 border-t border-slate-800 text-center">
-            <p className="text-xs text-slate-500">
-              © {new Date().getFullYear()} Lapangin. Semua hak dilindungi.
-            </p>
-          </div>
-        </div>
-      </nav>
-      </aside>
-
+            </div>
+          </nav>
+        </aside>
 
         {/* ==================================================
             MAIN
         ================================================== */}
 
-        <div className="min-w-0 lg:ml-64">
+        <div className="min-w-0 lg:ml-64 flex-1">
 
-
-          {/* TOPBAR */}
+          {/* ==================================================
+              TOPBAR
+          ================================================== */}
 
           <header className="min-h-[6.5625rem] border-b border-[#e4e8ef] bg-white">
 
             <div className="flex min-h-[6.5625rem] flex-wrap items-center justify-between gap-4 px-4 py-4 sm:px-9">
 
               <div>
-
                 <p className="text-xs font-medium text-slate-400">
                   Admin Panel
                 </p>
@@ -808,27 +675,271 @@ export default async function AdminCustomerPage({
                 <h2 className="text-xl font-bold">
                   Manajemen User
                 </h2>
-
               </div>
 
+              {/* RIGHT TOPBAR */}
 
-              <div className="hidden items-center gap-3 sm:flex">
+              <div className="flex items-center gap-5">
 
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-50 text-blue-600">
+                {/* ==================================================
+                    NOTIFICATION
+                ================================================== */}
 
-                  <Icon type="admin" />
+                <details className="relative">
 
-                </div>
+                  <summary
+                    aria-label="Notifikasi"
+                    className="flex h-12 w-12 cursor-pointer list-none items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-900 transition hover:bg-slate-50 [&::-webkit-details-marker]:hidden"
+                  >
 
-                <div>
+                    <svg
+                      width="20"
+                      height="20"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.8"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9" />
+                      <path d="M10 21h4" />
+                    </svg>
 
-                  <p className="text-sm font-bold">
-                    Administrator
-                  </p>
+                    {/* BADGE */}
 
-                  <p className="text-xs text-slate-400">
-                    Kelola pengguna sistem
-                  </p>
+                    {totalBookings > 0 && (
+                      <span className="absolute right-[7px] top-[6px] flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
+                        {totalBookings > 99
+                          ? "99+"
+                          : totalBookings}
+                      </span>
+                    )}
+
+                  </summary>
+
+                  {/* DROPDOWN */}
+
+                  <div className="absolute right-0 top-14 z-50 w-[380px] overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl">
+
+                    <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+
+                      <div>
+                        <h3 className="text-sm font-bold text-slate-900">
+                          Notifikasi
+                        </h3>
+
+                        <p className="mt-1 text-xs text-slate-400">
+                          Aktivitas pemesanan terbaru
+                        </p>
+                      </div>
+
+                      <span className="rounded-full bg-red-50 px-2.5 py-1 text-[10px] font-bold text-red-600">
+                        {totalBookings} booking
+                      </span>
+
+                    </div>
+
+                    {/* BOOKING TERBARU */}
+
+                    {totalBookings === 0 ? (
+
+                      <div className="px-5 py-10 text-center">
+
+                        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-slate-400">
+                          <Icon type="booking" />
+                        </div>
+
+                        <p className="mt-3 text-sm font-semibold text-slate-700">
+                          Belum ada booking
+                        </p>
+
+                        <p className="mt-1 text-xs text-slate-400">
+                          Notifikasi booking akan muncul di sini.
+                        </p>
+
+                      </div>
+
+                    ) : (
+
+                      <div className="max-h-[360px] overflow-y-auto">
+
+                        {(
+                          await prisma.booking.findMany({
+                            orderBy: {
+                              createdAt: "desc",
+                            },
+                            take: 5,
+                            include: {
+                              customer: {
+                                select: {
+                                  name: true,
+                                  username: true,
+                                  email: true,
+                                },
+                              },
+                              lapangan: {
+                                select: {
+                                  name: true,
+                                },
+                              },
+                            },
+                          })
+                        ).map((booking) => (
+
+                          <div
+                            key={booking.id}
+                            className="border-b border-slate-100 px-5 py-4 transition hover:bg-slate-50"
+                          >
+
+                            <div className="flex gap-3">
+
+                              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-100 text-blue-600">
+                                <Icon type="booking" />
+                              </div>
+
+                              <div className="min-w-0 flex-1">
+
+                                <div className="flex items-start justify-between gap-2">
+
+                                  <p className="text-sm font-bold text-slate-900">
+                                    Booking Baru
+                                  </p>
+
+                                  <span className="h-2 w-2 shrink-0 rounded-full bg-red-500" />
+
+                                </div>
+
+                                <p className="mt-1 text-xs leading-5 text-slate-500">
+
+                                  <b className="text-slate-700">
+                                    {booking.customer.name ||
+                                      booking.customer.username ||
+                                      booking.customer.email}
+                                  </b>{" "}
+                                  melakukan pemesanan{" "}
+                                  <b className="text-slate-700">
+                                    {booking.lapangan.name}
+                                  </b>
+
+                                </p>
+
+                                <div className="mt-2 flex flex-wrap gap-2">
+
+                                  <span className="rounded-lg bg-slate-100 px-2 py-1 text-[10px] font-semibold text-slate-500">
+                                    {formatTanggal(booking.startTime)}
+                                  </span>
+
+                                  <span className="rounded-lg bg-blue-50 px-2 py-1 text-[10px] font-semibold text-blue-600">
+                                    {new Intl.DateTimeFormat(
+                                      "id-ID",
+                                      {
+                                        hour: "2-digit",
+                                        minute: "2-digit",
+                                        timeZone: "Asia/Jakarta",
+                                      }
+                                    ).format(booking.startTime)}
+                                    {" - "}
+                                    {new Intl.DateTimeFormat(
+                                      "id-ID",
+                                      {
+                                        hour: "2-digit",
+                                        minute: "2-digit",
+                                        timeZone: "Asia/Jakarta",
+                                      }
+                                    ).format(booking.endTime)}
+                                  </span>
+
+                                  <span
+                                    className={`rounded-lg px-2 py-1 text-[10px] font-bold ${
+                                      booking.status === "CONFIRMED"
+                                        ? "bg-green-50 text-green-600"
+                                        : booking.status === "CANCELLED"
+                                        ? "bg-red-50 text-red-600"
+                                        : "bg-yellow-50 text-yellow-600"
+                                    }`}
+                                  >
+                                    {booking.status}
+                                  </span>
+
+                                </div>
+
+                                <p className="mt-2 text-[10px] text-slate-400">
+                                  {formatTanggalLengkap(
+                                    booking.createdAt
+                                  )}
+                                </p>
+
+                              </div>
+
+                            </div>
+
+                          </div>
+
+                        ))}
+
+                      </div>
+
+                    )}
+
+                    <div className="border-t border-slate-100 p-3">
+
+                      <Link
+                        href="/admin/booking"
+                        className="block w-full rounded-xl py-2.5 text-center text-xs font-bold text-slate-600 transition hover:bg-slate-50 hover:text-slate-900"
+                      >
+                        Lihat semua pemesanan
+                      </Link>
+
+                    </div>
+
+                  </div>
+
+                </details>
+
+                {/* PEMISAH */}
+
+                <div className="h-14 w-px bg-slate-200" />
+
+                {/* ==================================================
+                    PROFILE ADMIN
+                ================================================== */}
+
+                <div className="flex items-center gap-4">
+
+                  <div className="h-14 w-14 shrink-0 overflow-hidden rounded-full bg-slate-200">
+
+                    {adminUser.image ? (
+
+                      <img
+                        src={adminUser.image}
+                        alt={adminUser.name || "Administrator"}
+                        className="h-full w-full object-cover"
+                      />
+
+                    ) : (
+
+                      <div className="flex h-full w-full items-center justify-center bg-slate-950 text-lg font-semibold text-white">
+                        {(adminUser.name || "A")
+                          .charAt(0)
+                          .toUpperCase()}
+                      </div>
+
+                    )}
+
+                  </div>
+
+                  <div className="min-w-0">
+
+                    <p className="max-w-[240px] truncate text-base font-bold text-slate-900">
+                      {adminUser.name || "Administrator"}
+                    </p>
+
+                    <p className="mt-1 text-sm text-slate-400">
+                      Administrator
+                    </p>
+
+                  </div>
 
                 </div>
 
@@ -838,11 +949,11 @@ export default async function AdminCustomerPage({
 
           </header>
 
-
-          {/* CONTENT */}
+          {/* ==================================================
+              CONTENT
+          ================================================== */}
 
           <div className="p-5 md:p-8">
-
 
             {/* HEADER */}
 
@@ -859,12 +970,10 @@ export default async function AdminCustomerPage({
                 </h1>
 
                 <p className="mt-2 text-sm text-slate-500">
-                  Kelola data pengguna dan hak akses
-                  aplikasi Lapangin.
+                  Kelola data pengguna dan hak akses aplikasi Lapangin.
                 </p>
 
               </div>
-
 
               <div className="rounded-2xl border border-slate-200 bg-white px-5 py-4 shadow-sm">
 
@@ -880,10 +989,7 @@ export default async function AdminCustomerPage({
 
             </div>
 
-
-            {/* =================================================
-                NOTIFICATION
-            ================================================= */}
+            {/* SUCCESS */}
 
             {params.success && (
 
@@ -905,6 +1011,7 @@ export default async function AdminCustomerPage({
 
             )}
 
+            {/* ERROR */}
 
             {params.error && (
 
@@ -926,13 +1033,11 @@ export default async function AdminCustomerPage({
 
             )}
 
-
-            {/* =================================================
+            {/* ==================================================
                 STATISTIK
-            ================================================= */}
+            ================================================== */}
 
             <div className="mb-7 grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
-
 
               {/* TOTAL */}
 
@@ -953,9 +1058,7 @@ export default async function AdminCustomerPage({
                   </div>
 
                   <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
-
                     <Icon type="users" />
-
                   </div>
 
                 </div>
@@ -965,7 +1068,6 @@ export default async function AdminCustomerPage({
                 </p>
 
               </div>
-
 
               {/* CUSTOMER */}
 
@@ -986,9 +1088,7 @@ export default async function AdminCustomerPage({
                   </div>
 
                   <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-green-50 text-green-600">
-
                     <Icon type="customer" />
-
                   </div>
 
                 </div>
@@ -998,7 +1098,6 @@ export default async function AdminCustomerPage({
                 </p>
 
               </div>
-
 
               {/* ADMIN */}
 
@@ -1019,9 +1118,7 @@ export default async function AdminCustomerPage({
                   </div>
 
                   <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-purple-50 text-purple-600">
-
                     <Icon type="admin" />
-
                   </div>
 
                 </div>
@@ -1031,7 +1128,6 @@ export default async function AdminCustomerPage({
                 </p>
 
               </div>
-
 
               {/* BOOKING */}
 
@@ -1052,9 +1148,7 @@ export default async function AdminCustomerPage({
                   </div>
 
                   <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-orange-50 text-orange-600">
-
                     <Icon type="booking" />
-
                   </div>
 
                 </div>
@@ -1067,10 +1161,9 @@ export default async function AdminCustomerPage({
 
             </div>
 
-
-            {/* =================================================
+            {/* ==================================================
                 FILTER
-            ================================================= */}
+            ================================================== */}
 
             <div className="mb-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
 
@@ -1079,15 +1172,12 @@ export default async function AdminCustomerPage({
                 className="flex flex-col gap-4 lg:flex-row"
               >
 
-
                 {/* SEARCH */}
 
                 <div className="relative flex-1">
 
                   <div className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
-
                     <Icon type="search" />
-
                   </div>
 
                   <input
@@ -1099,7 +1189,6 @@ export default async function AdminCustomerPage({
                   />
 
                 </div>
-
 
                 {/* ROLE */}
 
@@ -1123,7 +1212,6 @@ export default async function AdminCustomerPage({
 
                 </select>
 
-
                 {/* BUTTON */}
 
                 <button
@@ -1133,9 +1221,7 @@ export default async function AdminCustomerPage({
                   Cari User
                 </button>
 
-
-                {(search ||
-                  role !== "ALL") && (
+                {(search || role !== "ALL") && (
 
                   <Link
                     href="/admin/customer"
@@ -1150,10 +1236,9 @@ export default async function AdminCustomerPage({
 
             </div>
 
-
-            {/* =================================================
+            {/* ==================================================
                 USER TABLE
-            ================================================= */}
+            ================================================== */}
 
             <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
 
@@ -1177,15 +1262,12 @@ export default async function AdminCustomerPage({
 
               </div>
 
-
               {users.length === 0 ? (
 
                 <div className="px-6 py-20 text-center">
 
                   <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-100 text-slate-400">
-
                     <Icon type="users" />
-
                   </div>
 
                   <h3 className="mt-5 text-lg font-bold text-slate-800">
@@ -1193,8 +1275,7 @@ export default async function AdminCustomerPage({
                   </h3>
 
                   <p className="mt-2 text-sm text-slate-400">
-                    Coba gunakan nama atau email yang
-                    berbeda.
+                    Coba gunakan nama atau email yang berbeda.
                   </p>
 
                 </div>
@@ -1237,262 +1318,212 @@ export default async function AdminCustomerPage({
 
                     </thead>
 
-
                     <tbody className="divide-y divide-slate-100">
 
-                      {users.map(
-                        (user) => {
+                      {users.map((user) => {
 
-                          const customer =
-                            customerMap.get(
-                              user.id
-                            );
+                        const customer =
+                          customerMap.get(user.id);
 
+                        return (
 
-                          return (
+                          <tr
+                            key={user.id}
+                            className="transition hover:bg-slate-50"
+                          >
 
-                            <tr
-                              key={user.id}
-                              className="transition hover:bg-slate-50"
-                            >
+                            {/* USER */}
 
+                            <td className="px-6 py-5">
 
-                              {/* USER */}
+                              <div className="flex items-center gap-3">
 
-                              <td className="px-6 py-5">
+                                {user.image ? (
 
-                                <div className="flex items-center gap-3">
-
-                                  {user.image ? (
-
-                                    <img
-                                      src={user.image}
-                                      alt={
-                                        user.name ||
-                                        "User"
-                                      }
-                                      className="h-11 w-11 rounded-full object-cover"
-                                    />
-
-                                  ) : (
-
-                                    <div
-                                      className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full font-bold ${
-                                        user.role ===
-                                        "ADMIN"
-                                          ? "bg-purple-100 text-purple-700"
-                                          : "bg-blue-100 text-blue-700"
-                                      }`}
-                                    >
-
-                                      {(
-                                        user.name ||
-                                        user.email ||
-                                        "U"
-                                      )
-                                        .charAt(0)
-                                        .toUpperCase()}
-
-                                    </div>
-
-                                  )}
-
-
-                                  <div className="min-w-0">
-
-                                    <p className="truncate font-bold text-slate-800">
-
-                                      {user.name ||
-                                        "Tanpa Nama"}
-
-                                    </p>
-
-                                    <p className="max-w-[240px] truncate text-xs text-slate-400">
-
-                                      {user.email}
-
-                                    </p>
-
-                                  </div>
-
-                                </div>
-
-                              </td>
-
-
-                              {/* USERNAME */}
-
-                              <td className="px-6 py-5">
-
-                                {customer ? (
-
-                                  <div>
-
-                                    <p className="font-semibold text-slate-700">
-                                      @{customer.username}
-                                    </p>
-
-                                    <p className="mt-1 text-xs text-slate-400">
-                                      Customer
-                                    </p>
-
-                                  </div>
-
-                                ) : (
-
-                                  <span className="text-sm text-slate-400">
-                                    —
-                                  </span>
-
-                                )}
-
-                              </td>
-
-
-                              {/* ROLE */}
-
-                              <td className="px-6 py-5">
-
-                                {user.role ===
-                                "ADMIN" ? (
-
-                                  <span className="inline-flex items-center gap-1.5 rounded-full bg-purple-100 px-3 py-1.5 text-xs font-bold text-purple-700">
-
-                                    <span className="h-1.5 w-1.5 rounded-full bg-purple-500" />
-
-                                    ADMIN
-
-                                  </span>
-
-                                ) : (
-
-                                  <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-100 px-3 py-1.5 text-xs font-bold text-blue-700">
-
-                                    <span className="h-1.5 w-1.5 rounded-full bg-blue-500" />
-
-                                    USER
-
-                                  </span>
-
-                                )}
-
-                              </td>
-
-
-                              {/* BOOKING */}
-
-                              <td className="px-6 py-5">
-
-                                <div className="flex items-center gap-2">
-
-                                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 text-slate-500">
-
-                                    <Icon type="booking" />
-
-                                  </div>
-
-                                  <span className="font-bold text-slate-700">
-
-                                    {customer?._count
-                                      .bookings ??
-                                      0}
-
-                                  </span>
-
-                                </div>
-
-                              </td>
-
-
-                              {/* TANGGAL */}
-
-                              <td className="px-6 py-5">
-
-                                <div className="flex items-center gap-2 text-sm">
-
-                                  <span className="text-slate-400">
-
-                                    <Icon type="calendar" />
-
-                                  </span>
-
-                                  <span className="font-medium text-slate-600">
-
-                                    {formatTanggal(
-                                      user.createdAt
-                                    )}
-
-                                  </span>
-
-                                </div>
-
-                              </td>
-
-
-                              {/* ROLE ACTION */}
-
-                              <td className="px-6 py-5">
-
-                                <form
-                                  action={
-                                    updateRole
-                                  }
-                                  className="flex items-center justify-end gap-2"
-                                >
-
-                                  <input
-                                    type="hidden"
-                                    name="userId"
-                                    value={
-                                      user.id
-                                    }
+                                  <img
+                                    src={user.image}
+                                    alt={user.name || "User"}
+                                    className="h-11 w-11 rounded-full object-cover"
                                   />
 
+                                ) : (
 
-                                  <select
-                                    name="role"
-                                    defaultValue={
-                                      user.role
-                                    }
-                                    disabled={
-                                      user.id ===
-                                      adminUser.id
-                                    }
-                                    className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-bold outline-none focus:border-blue-500"
+                                  <div
+                                    className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full font-bold ${
+                                      user.role === "ADMIN"
+                                        ? "bg-purple-100 text-purple-700"
+                                        : "bg-blue-100 text-blue-700"
+                                    }`}
                                   >
+                                    {(user.name ||
+                                      user.email ||
+                                      "U")
+                                      .charAt(0)
+                                      .toUpperCase()}
+                                  </div>
 
-                                    <option value="USER">
-                                      USER
-                                    </option>
+                                )}
 
-                                    <option value="ADMIN">
-                                      ADMIN
-                                    </option>
+                                <div className="min-w-0">
 
-                                  </select>
+                                  <p className="truncate font-bold text-slate-800">
+                                    {user.name || "Tanpa Nama"}
+                                  </p>
 
+                                  <p className="max-w-[240px] truncate text-xs text-slate-400">
+                                    {user.email}
+                                  </p>
 
-                                  <button
-                                    type="submit"
-                                    disabled={
-                                      user.id ===
-                                      adminUser.id
-                                    }
-                                    className="rounded-lg bg-[#020817] px-3 py-2 text-xs font-bold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-40"
-                                  >
-                                    Simpan
-                                  </button>
+                                </div>
 
-                                </form>
+                              </div>
 
-                              </td>
+                            </td>
 
-                            </tr>
+                            {/* USERNAME */}
 
-                          );
+                            <td className="px-6 py-5">
 
-                        }
-                      )}
+                              {customer ? (
+
+                                <div>
+
+                                  <p className="font-semibold text-slate-700">
+                                    @{customer.username}
+                                  </p>
+
+                                  <p className="mt-1 text-xs text-slate-400">
+                                    Customer
+                                  </p>
+
+                                </div>
+
+                              ) : (
+
+                                <span className="text-sm text-slate-400">
+                                  —
+                                </span>
+
+                              )}
+
+                            </td>
+
+                            {/* ROLE */}
+
+                            <td className="px-6 py-5">
+
+                              {user.role === "ADMIN" ? (
+
+                                <span className="inline-flex items-center gap-1.5 rounded-full bg-purple-100 px-3 py-1.5 text-xs font-bold text-purple-700">
+
+                                  <span className="h-1.5 w-1.5 rounded-full bg-purple-500" />
+
+                                  ADMIN
+
+                                </span>
+
+                              ) : (
+
+                                <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-100 px-3 py-1.5 text-xs font-bold text-blue-700">
+
+                                  <span className="h-1.5 w-1.5 rounded-full bg-blue-500" />
+
+                                  USER
+
+                                </span>
+
+                              )}
+
+                            </td>
+
+                            {/* BOOKING */}
+
+                            <td className="px-6 py-5">
+
+                              <div className="flex items-center gap-2">
+
+                                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 text-slate-500">
+                                  <Icon type="booking" />
+                                </div>
+
+                                <span className="font-bold text-slate-700">
+                                  {customer?._count.bookings ?? 0}
+                                </span>
+
+                              </div>
+
+                            </td>
+
+                            {/* TANGGAL */}
+
+                            <td className="px-6 py-5">
+
+                              <div className="flex items-center gap-2 text-sm">
+
+                                <span className="text-slate-400">
+                                  <Icon type="calendar" />
+                                </span>
+
+                                <span className="font-medium text-slate-600">
+                                  {formatTanggal(user.createdAt)}
+                                </span>
+
+                              </div>
+
+                            </td>
+
+                            {/* ROLE ACTION */}
+
+                            <td className="px-6 py-5">
+
+                              <form
+                                action={updateRole}
+                                className="flex items-center justify-end gap-2"
+                              >
+
+                                <input
+                                  type="hidden"
+                                  name="userId"
+                                  value={user.id}
+                                />
+
+                                <select
+                                  name="role"
+                                  defaultValue={user.role}
+                                  disabled={
+                                    user.id === adminUser.id
+                                  }
+                                  className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-bold outline-none focus:border-blue-500"
+                                >
+
+                                  <option value="USER">
+                                    USER
+                                  </option>
+
+                                  <option value="ADMIN">
+                                    ADMIN
+                                  </option>
+
+                                </select>
+
+                                <button
+                                  type="submit"
+                                  disabled={
+                                    user.id === adminUser.id
+                                  }
+                                  className="rounded-lg bg-[#020817] px-3 py-2 text-xs font-bold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-40"
+                                >
+                                  Simpan
+                                </button>
+
+                              </form>
+
+                            </td>
+
+                          </tr>
+
+                        );
+                      })}
 
                     </tbody>
 
@@ -1504,10 +1535,9 @@ export default async function AdminCustomerPage({
 
             </div>
 
-
-            {/* =================================================
+            {/* ==================================================
                 INFORMATION
-            ================================================= */}
+            ================================================== */}
 
             <div className="mt-6 rounded-2xl border border-blue-100 bg-blue-50 p-5">
 
@@ -1525,12 +1555,11 @@ export default async function AdminCustomerPage({
 
                   <p className="mt-1 text-sm leading-6 text-blue-700">
 
-                    Role <b>USER</b> digunakan untuk
-                    pelanggan yang melakukan pemesanan
-                    lapangan. Role <b>ADMIN</b> memiliki
-                    akses ke halaman administrasi untuk
-                    mengelola lapangan, booking, dan
-                    pengguna.
+                    Role <b>USER</b> digunakan untuk pelanggan
+                    yang melakukan pemesanan lapangan. Role{" "}
+                    <b>ADMIN</b> memiliki akses ke halaman
+                    administrasi untuk mengelola lapangan,
+                    booking, dan pengguna.
 
                   </p>
 
@@ -1545,7 +1574,6 @@ export default async function AdminCustomerPage({
         </div>
 
       </div>
-
     </main>
   );
 }

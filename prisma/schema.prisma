@@ -104,7 +104,23 @@ model Admin {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+model Notification {
+  id        String   @id @default(uuid())
+  title     String
+  message   String   @db.Text
+  type      String   @default("BOOKING")
+  isRead    Boolean  @default(false)
 
+  bookingId String?
+  booking   Booking? @relation(fields: [bookingId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([bookingId])
+  @@index([isRead])
+  @@index([createdAt])
+}
 model Lapangan {
   id          String    @id @default(uuid())
   name        String
@@ -140,7 +156,8 @@ model Booking {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  payments Payment[]
+  payments      Payment[]
+  notifications Notification[]
 }
 
 model Payment {

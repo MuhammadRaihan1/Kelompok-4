@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
+import { useSession } from "@/lib/auth-client";
 
 
 /* =========================================================
@@ -331,6 +332,8 @@ function formatRupiah(value: number | string) {
 ========================================================= */
 
 export default function AdminLapanganPage() {
+  const { data: session, isPending: sessionLoading } = useSession();
+
   const [lapangan, setLapangan] = useState<Lapangan[]>([]);
 
   const [loading, setLoading] = useState(true);
@@ -354,7 +357,14 @@ export default function AdminLapanganPage() {
   const [image, setImage] = useState<File | null>(null);
 
   const [imagePreview, setImagePreview] = useState("");
+  const userName = session?.user?.name || "Administrator";
 
+  const userEmail = session?.user?.email || "";
+
+  const userInitial = userName
+    .trim()
+    .charAt(0)
+    .toUpperCase();
   /* =========================================================
      LOAD DATA LAPANGAN
   ========================================================= */
@@ -872,25 +882,34 @@ export default function AdminLapanganPage() {
 
               {/* ADMIN NAME */}
 
-              <div className="hidden text-right sm:block">
+              <div className="flex items-center gap-3">
+  {/* FOTO USER */}
+  <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full bg-slate-900">
+    {session?.user?.image ? (
+      <img
+        src={session.user.image}
+        alt={session.user.name || "User"}
+        className="h-full w-full object-cover"
+      />
+    ) : (
+      <div className="flex h-full w-full items-center justify-center font-semibold text-white">
+        {(session?.user?.name || "U").charAt(0).toUpperCase()}
+      </div>
+    )}
+  </div>
 
-                <p className="text-sm font-semibold text-slate-900">
-                  Muhammad Raihan
-                </p>
+  {/* NAMA */}
+  <div className="min-w-0">
+    <p className="max-w-[180px] truncate text-sm font-semibold text-slate-900">
+      {session?.user?.name || "Administrator"}
+    </p>
 
-                <p className="text-xs text-slate-400">
-                  Administrator
-                </p>
-
-              </div>
-
-              {/* ADMIN AVATAR */}
-
-              <div className="flex h-11 w-11 items-center justify-center rounded-full bg-slate-950 font-semibold text-white">
-                M
-              </div>
-
-            </div>
+    <p className="text-xs text-slate-400">
+      Administrator
+    </p>
+  </div>
+</div>
+</div>
 
           </header>
 
