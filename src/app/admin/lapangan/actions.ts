@@ -9,9 +9,89 @@ import { revalidatePath } from "next/cache";
    TAMBAH LAPANGAN
 ========================================================= */
 
-export async function tambahLapangan(
-  formData: FormData
-) {
+export async function tambahLapangan(formData: FormData) {
+  const requestHeaders = await headers();
+
+  const session = await auth.api.getSession({
+    headers: requestHeaders,
+  });
+
+  if (!session) {
+    throw new Error("Anda harus login terlebih dahulu.");
+  }
+
+  const name = String(formData.get("name") || "").trim();
+  const description = String(
+    formData.get("description") || ""
+  ).trim();
+  const location = String(
+    formData.get("location") || ""
+  ).trim();
+  const priceValue = String(
+    formData.get("price") || ""
+  ).trim();
+
+  const category = "Futsal";
+
+  if (!name) {
+    throw new Error("Nama lapangan wajib diisi.");
+  }
+
+  if (!location) {
+    throw new Error("Lokasi lapangan wajib diisi.");
+  }
+
+  if (!priceValue) {
+    throw new Error("Harga lapangan wajib diisi.");
+  }
+
+  const normalizedPrice = priceValue
+    .replace(/\./g, "")
+    .replace(/,/g, "");
+
+  const price = Number(normalizedPrice);
+
+  if (!Number.isFinite(price) || price <= 0) {
+    throw new Error("Harga lapangan tidak valid.");
+  }
+
+  try {
+    await prisma.lapangan.create({
+      data: {
+        name,
+        category,
+        description: description || null,
+        location,
+        price,
+        picture_url: null,
+        isActive: true,
+      },
+    });
+  } catch (error) {
+    console.error(
+      "Error Prisma saat menambahkan lapangan:",
+      error
+    );
+
+    throw new Error(
+      "Lapangan gagal disimpan ke database."
+    );
+  }
+
+  revalidatePath("/admin/lapangan");
+  revalidatePath("/dashboard/lapangan");
+
+  return {
+    success: true,
+    message: "Lapangan berhasil ditambahkan.",
+  };
+}
+
+/* =========================================================
+   EDIT LAPANGAN
+========================================================= */
+
+export async function editLapangan(formData: FormData) {
   /* =======================================================
      CEK SESSION
   ======================================================= */
@@ -32,8 +112,16 @@ export async function tambahLapangan(
      AMBIL DATA
   ======================================================= */
 
+  const id = String(
+    formData.get("id") || ""
+  ).trim();
+
   const name = String(
     formData.get("name") || ""
+  ).trim();
+
+  const category = String(
+    formData.get("category") || ""
   ).trim();
 
   const description = String(
@@ -48,19 +136,28 @@ export async function tambahLapangan(
     formData.get("price") || ""
   ).trim();
 
-  /* =======================================================
-     KATEGORI OTOMATIS FUTSAL
-  ======================================================= */
-
-  const category = "Futsal";
+  const pictureUrlValue =
+    formData.get("picture_url");
 
   /* =======================================================
      VALIDASI
   ======================================================= */
 
+  if (!id) {
+    throw new Error(
+      "ID lapangan tidak ditemukan."
+    );
+  }
+
   if (!name) {
     throw new Error(
       "Nama lapangan wajib diisi."
+    );
+  }
+
+  if (!category) {
+    throw new Error(
+      "Jenis olahraga wajib dipilih."
     );
   }
 
@@ -78,12 +175,6 @@ export async function tambahLapangan(
 
   /* =======================================================
      NORMALISASI HARGA
-
-     Contoh:
-     100.000  -> 100000
-     150.000  -> 150000
-     75000    -> 75000
-     1.500.000 -> 1500000
   ======================================================= */
 
   const normalizedPrice = priceValue
@@ -102,45 +193,86 @@ export async function tambahLapangan(
   }
 
   /* =======================================================
-     SIMPAN KE DATABASE
+     CEK LAPANGAN
   ======================================================= */
 
-  try {
-    await prisma.lapangan.create({
-      data: {
-        name,
-        category: "Futsal",
-        description: description || null,
-        location,
-        price,
-        picture_url: null,
-
-        // Semua lapangan baru otomatis aktif
-        isActive: true,
+  const lapangan =
+    await prisma.lapangan.findUnique({
+      where: {
+        id,
       },
     });
-  } catch (error) {
-    console.error(
-      "Error Prisma saat menambahkan lapangan:",
-      error
-    );
 
+  if (!lapangan) {
     throw new Error(
-      "Lapangan gagal disimpan ke database."
+      "Lapangan tidak ditemukan."
     );
   }
 
   /* =======================================================
-     REFRESH DATA
+     GAMBAR
+
+     Jika tidak ada gambar baru,
+     gunakan gambar lama.
+
+     Jika ada gambar baru,
+     gunakan gambar baru.
   ======================================================= */
 
-  revalidatePath("/admin/lapangan");
-  revalidatePath("/dashboard/lapangan");
+  const picture_url =
+    pictureUrlValue === null
+      ? lapangan.picture_url
+      : String(
+          pictureUrlValue
+        ).trim() || null;
+
+  /* =======================================================
+     UPDATE DATABASE
+  ======================================================= */
+
+  try {
+    await prisma.lapangan.update({
+      where: {
+        id,
+      },
+
+      data: {
+        name,
+        category,
+        description:
+          description || null,
+        location,
+        price,
+        picture_url,
+      },
+    });
+  } catch (error) {
+    console.error(
+      "Error Prisma saat mengedit lapangan:",
+      error
+    );
+
+    throw new Error(
+      "Lapangan gagal diperbarui."
+    );
+  }
+
+  /* =======================================================
+     REFRESH
+  ======================================================= */
+
+  revalidatePath(
+    "/admin/lapangan"
+  );
+
+  revalidatePath(
+    "/dashboard/lapangan"
+  );
 
   return {
     success: true,
     message:
-      "Lapangan berhasil ditambahkan.",
+      "Lapangan berhasil diperbarui.",
   };
 }
 
@@ -196,9 +328,6 @@ export async function hapusLapangan(
 
   /* =======================================================
      CEK BOOKING
-
-     Jika lapangan sudah memiliki booking,
-     jangan langsung dihapus.
   ======================================================= */
 
   const jumlahBooking =
@@ -239,8 +368,13 @@ export async function hapusLapangan(
      REFRESH
   ======================================================= */
 
-  revalidatePath("/admin/lapangan");
-  revalidatePath("/dashboard/lapangan");
+  revalidatePath(
+    "/admin/lapangan"
+  );
+
+  revalidatePath(
+    "/dashboard/lapangan"
+  );
 
   return {
     success: true,
