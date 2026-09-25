@@ -438,6 +438,7 @@ export default function AdminLapanganPage() {
 
                 <div className="h-10 w-10 overflow-hidden rounded-full bg-slate-900">
                   {session?.user?.image ? (
+                    // eslint-disable-next-line @next/next/no-img-element
                     <img
                       src={session.user.image}
                       alt={

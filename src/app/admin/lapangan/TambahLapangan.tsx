@@ -3,32 +3,90 @@
 import { useState } from "react";
 import { tambahLapangan } from "./actions";
 
-export default function TambahLapangan() {
-  const [open, setOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [price, setPrice] = useState("");
+/* =====================================================
+   PROPS
+===================================================== */
+
+type Props = {
+  onSuccess?: () => Promise<void> | void;
+};
+
+/* =====================================================
+   KOMPONEN TAMBAH LAPANGAN
+===================================================== */
+
+export default function TambahLapangan({
+  onSuccess,
+}: Props) {
+  const [open, setOpen] =
+    useState(false);
+
+  const [loading, setLoading] =
+    useState(false);
+
+  const [price, setPrice] =
+    useState("");
+
+  /* =====================================================
+     SUBMIT FORM
+  ===================================================== */
 
   async function handleSubmit(
     event: React.FormEvent<HTMLFormElement>
   ) {
     event.preventDefault();
 
-    const form = event.currentTarget;
+    const form =
+      event.currentTarget;
 
     setLoading(true);
 
     try {
-      const formData = new FormData(form);
+      /* -------------------------------------------------
+         AMBIL DATA FORM
+      ------------------------------------------------- */
 
-      await tambahLapangan(formData);
+      const formData =
+        new FormData(form);
+
+      /* -------------------------------------------------
+         TAMBAH LAPANGAN KE DATABASE
+      ------------------------------------------------- */
+
+      await tambahLapangan(
+        formData
+      );
+
+      /* -------------------------------------------------
+         RESET FORM
+      ------------------------------------------------- */
 
       form.reset();
+
       setPrice("");
+
       setOpen(false);
 
-      alert("Lapangan berhasil ditambahkan.");
+      /* -------------------------------------------------
+         PESAN BERHASIL
+      ------------------------------------------------- */
+
+      alert(
+        "Lapangan berhasil ditambahkan."
+      );
+
+      /* -------------------------------------------------
+         REFRESH DATA DI PAGE.TSX
+      ------------------------------------------------- */
+
+      if (onSuccess) {
+        await onSuccess();
+      }
     } catch (error) {
-      console.error("Gagal menambahkan lapangan:", error);
+      console.error(
+        "Gagal menambahkan lapangan:",
+        error
+      );
 
       alert(
         error instanceof Error
@@ -40,26 +98,50 @@ export default function TambahLapangan() {
     }
   }
 
+  /* =====================================================
+     FORMAT / VALIDASI HARGA
+  ===================================================== */
+
   function handlePriceChange(
     event: React.ChangeEvent<HTMLInputElement>
   ) {
-    let value = event.target.value;
+    let value =
+      event.target.value;
 
-    // Hanya izinkan angka dan titik
-    value = value.replace(/[^\d.]/g, "");
+    /*
+     * Hanya mengizinkan angka
+     * dan titik.
+     *
+     * Contoh:
+     * 100.000
+     * 150.000
+     * 1.500.000
+     */
+
+    value =
+      value.replace(
+        /[^\d.]/g,
+        ""
+      );
 
     setPrice(value);
   }
 
+  /* =====================================================
+     RETURN
+  ===================================================== */
+
   return (
     <>
-      {/* =====================================================
+      {/* =================================================
           TOMBOL TAMBAH LAPANGAN
-      ====================================================== */}
+      ================================================== */}
 
       <button
         type="button"
-        onClick={() => setOpen(true)}
+        onClick={() =>
+          setOpen(true)
+        }
         className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-slate-900 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
       >
         <svg
@@ -77,12 +159,13 @@ export default function TambahLapangan() {
         Tambah Lapangan
       </button>
 
-      {/* =====================================================
+      {/* =================================================
           MODAL
-      ====================================================== */}
+      ================================================== */}
 
       {open && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 px-4 py-6">
+
           <div className="max-h-[90vh] w-full max-w-xl overflow-y-auto rounded-2xl bg-white shadow-2xl">
 
             {/* =================================================
@@ -90,13 +173,15 @@ export default function TambahLapangan() {
             ================================================== */}
 
             <div className="flex items-center justify-between border-b border-slate-200 px-6 py-5">
+
               <div>
                 <h2 className="text-lg font-bold text-slate-900">
                   Tambah Lapangan
                 </h2>
 
                 <p className="mt-1 text-xs text-slate-400">
-                  Tambahkan lapangan futsal baru ke sistem.
+                  Tambahkan lapangan
+                  futsal baru ke sistem.
                 </p>
               </div>
 
@@ -119,6 +204,7 @@ export default function TambahLapangan() {
                   strokeWidth="2"
                 >
                   <path d="M18 6 6 18" />
+
                   <path d="m6 6 12 12" />
                 </svg>
               </button>
@@ -162,6 +248,7 @@ export default function TambahLapangan() {
                 </label>
 
                 <div className="flex h-11 items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4">
+
                   <span className="text-xl">
                     ⚽
                   </span>
@@ -169,9 +256,11 @@ export default function TambahLapangan() {
                   <span className="text-sm font-medium text-slate-700">
                     Futsal
                   </span>
+
                 </div>
 
                 {/* Dikirim ke Server Action */}
+
                 <input
                   type="hidden"
                   name="category"
@@ -199,7 +288,9 @@ export default function TambahLapangan() {
                     type="text"
                     inputMode="numeric"
                     value={price}
-                    onChange={handlePriceChange}
+                    onChange={
+                      handlePriceChange
+                    }
                     placeholder="Contoh: 100.000"
                     required
                     disabled={loading}
@@ -208,7 +299,8 @@ export default function TambahLapangan() {
                 </div>
 
                 <p className="mt-1.5 text-xs text-slate-400">
-                  Masukkan harga sesuai tarif lapangan. Contoh:
+                  Masukkan harga sesuai
+                  tarif lapangan. Contoh:
                   100.000 = Rp100.000.
                 </p>
               </div>
@@ -257,7 +349,9 @@ export default function TambahLapangan() {
 
               <div className="flex flex-col-reverse gap-3 border-t border-slate-100 pt-5 sm:flex-row sm:justify-end">
 
-                {/* BATAL */}
+                {/* =================================================
+                    BATAL
+                ================================================== */}
 
                 <button
                   type="button"
@@ -272,7 +366,9 @@ export default function TambahLapangan() {
                   Batal
                 </button>
 
-                {/* SIMPAN */}
+                {/* =================================================
+                    SIMPAN
+                ================================================== */}
 
                 <button
                   type="submit"
@@ -281,8 +377,11 @@ export default function TambahLapangan() {
                 >
                   {loading ? (
                     <span className="flex items-center gap-2">
+
                       <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+
                       Menyimpan...
+
                     </span>
                   ) : (
                     "Simpan Lapangan"
@@ -290,11 +389,10 @@ export default function TambahLapangan() {
                 </button>
 
               </div>
-
             </form>
           </div>
         </div>
       )}
     </>
   );
-}
+} 

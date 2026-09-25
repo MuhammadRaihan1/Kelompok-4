@@ -11,6 +11,9 @@ type Props = {
   location: string;
   description: string | null;
   picture_url: string | null;
+
+  // Dipanggil setelah edit berhasil
+  onSuccess?: () => Promise<void> | void;
 };
 
 export default function EditLapangan({
@@ -21,12 +24,21 @@ export default function EditLapangan({
   location,
   description,
   picture_url,
+  onSuccess,
 }: Props) {
+  /* =====================================================
+     STATE
+  ===================================================== */
+
   const [loading, setLoading] =
     useState(false);
 
   const [showModal, setShowModal] =
     useState(false);
+
+  /* =====================================================
+     FORM STATE
+  ===================================================== */
 
   const [formName, setFormName] =
     useState(name);
@@ -52,12 +64,19 @@ export default function EditLapangan({
 
   function openModal() {
     setFormName(name);
+
     setFormCategory(category);
-    setFormPrice(String(price));
+
+    setFormPrice(
+      String(price)
+    );
+
     setFormLocation(location);
+
     setFormDescription(
       description || ""
     );
+
     setFormPictureUrl(
       picture_url || ""
     );
@@ -86,12 +105,21 @@ export default function EditLapangan({
   ) {
     event.preventDefault();
 
+    /* ---------------------------------------------------
+       VALIDASI NAMA
+    --------------------------------------------------- */
+
     if (!formName.trim()) {
       alert(
         "Nama lapangan wajib diisi."
       );
+
       return;
     }
+
+    /* ---------------------------------------------------
+       VALIDASI HARGA
+    --------------------------------------------------- */
 
     if (
       !formPrice ||
@@ -100,18 +128,28 @@ export default function EditLapangan({
       alert(
         "Harga lapangan wajib diisi."
       );
+
       return;
     }
+
+    /* ---------------------------------------------------
+       VALIDASI LOKASI
+    --------------------------------------------------- */
 
     if (!formLocation.trim()) {
       alert(
         "Lokasi lapangan wajib diisi."
       );
+
       return;
     }
 
     try {
       setLoading(true);
+
+      /* =================================================
+         FORM DATA
+      ================================================= */
 
       const formData =
         new FormData();
@@ -133,7 +171,9 @@ export default function EditLapangan({
 
       formData.append(
         "price",
-        String(Number(formPrice))
+        String(
+          Number(formPrice)
+        )
       );
 
       formData.append(
@@ -151,9 +191,17 @@ export default function EditLapangan({
         formPictureUrl
       );
 
+      /* =================================================
+         PANGGIL SERVER ACTION
+      ================================================= */
+
       await editLapangan(
         formData
       );
+
+      /* =================================================
+         BERHASIL
+      ================================================= */
 
       alert(
         "Lapangan berhasil diperbarui."
@@ -161,7 +209,13 @@ export default function EditLapangan({
 
       setShowModal(false);
 
-      window.location.reload();
+      /* =================================================
+         REFRESH DATA DI PAGE.TSX
+      ================================================= */
+
+      if (onSuccess) {
+        await onSuccess();
+      }
     } catch (error) {
       console.error(
         "EDIT LAPANGAN ERROR:",
@@ -177,6 +231,10 @@ export default function EditLapangan({
       setLoading(false);
     }
   }
+
+  /* =====================================================
+     RETURN
+  ===================================================== */
 
   return (
     <>
@@ -201,6 +259,7 @@ export default function EditLapangan({
           strokeWidth="2"
         >
           <path d="M12 20h9" />
+
           <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L8 18l-4 1 1-4Z" />
         </svg>
 
@@ -213,11 +272,15 @@ export default function EditLapangan({
 
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 p-4">
+
           <div className="max-h-[95vh] w-full max-w-xl overflow-y-auto rounded-2xl bg-white shadow-2xl">
 
-            {/* HEADER */}
+            {/* =================================================
+                HEADER
+            ================================================= */}
 
             <div className="flex items-start justify-between border-b border-slate-100 px-6 py-5">
+
               <div>
                 <h2 className="text-xl font-bold text-slate-900">
                   Edit Lapangan
@@ -233,23 +296,27 @@ export default function EditLapangan({
                 type="button"
                 onClick={closeModal}
                 disabled={loading}
-                className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100"
+                className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 disabled:opacity-50"
               >
                 ×
               </button>
             </div>
 
-            {/* FORM */}
+            {/* =================================================
+                FORM
+            ================================================= */}
 
             <form
               onSubmit={handleSubmit}
               className="space-y-5 px-6 py-6"
             >
 
-              {/* NAMA */}
+              {/* =================================================
+                  NAMA
+              ================================================= */}
 
               <div>
-                <label className="mb-2 block text-sm font-semibold">
+                <label className="mb-2 block text-sm font-semibold text-slate-800">
                   Nama Lapangan
                 </label>
 
@@ -261,15 +328,18 @@ export default function EditLapangan({
                       event.target.value
                     )
                   }
-                  className="h-11 w-full rounded-xl border border-slate-200 px-4 text-sm outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-50"
+                  disabled={loading}
+                  className="h-11 w-full rounded-xl border border-slate-200 px-4 text-sm outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-50"
                   required
                 />
               </div>
 
-              {/* KATEGORI */}
+              {/* =================================================
+                  KATEGORI
+              ================================================= */}
 
               <div>
-                <label className="mb-2 block text-sm font-semibold">
+                <label className="mb-2 block text-sm font-semibold text-slate-800">
                   Jenis Olahraga
                 </label>
 
@@ -280,7 +350,8 @@ export default function EditLapangan({
                       event.target.value
                     )
                   }
-                  className="h-11 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm outline-none"
+                  disabled={loading}
+                  className="h-11 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-50"
                 >
                   <option value="Futsal">
                     ⚽ Futsal
@@ -300,15 +371,18 @@ export default function EditLapangan({
                 </select>
               </div>
 
-              {/* HARGA */}
+              {/* =================================================
+                  HARGA
+              ================================================= */}
 
               <div>
-                <label className="mb-2 block text-sm font-semibold">
+                <label className="mb-2 block text-sm font-semibold text-slate-800">
                   Harga per Jam
                 </label>
 
                 <div className="flex overflow-hidden rounded-xl border border-slate-200">
-                  <div className="flex items-center bg-slate-50 px-4 text-sm font-medium">
+
+                  <div className="flex items-center bg-slate-50 px-4 text-sm font-medium text-slate-600">
                     Rp
                   </div>
 
@@ -321,16 +395,19 @@ export default function EditLapangan({
                         event.target.value
                       )
                     }
+                    disabled={loading}
                     className="h-11 flex-1 px-4 text-sm outline-none"
                     required
                   />
                 </div>
               </div>
 
-              {/* LOKASI */}
+              {/* =================================================
+                  LOKASI
+              ================================================= */}
 
               <div>
-                <label className="mb-2 block text-sm font-semibold">
+                <label className="mb-2 block text-sm font-semibold text-slate-800">
                   Lokasi
                 </label>
 
@@ -342,15 +419,18 @@ export default function EditLapangan({
                       event.target.value
                     )
                   }
-                  className="h-11 w-full rounded-xl border border-slate-200 px-4 text-sm outline-none"
+                  disabled={loading}
+                  className="h-11 w-full rounded-xl border border-slate-200 px-4 text-sm outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-50"
                   required
                 />
               </div>
 
-              {/* DESKRIPSI */}
+              {/* =================================================
+                  DESKRIPSI
+              ================================================= */}
 
               <div>
-                <label className="mb-2 block text-sm font-semibold">
+                <label className="mb-2 block text-sm font-semibold text-slate-800">
                   Deskripsi
                 </label>
 
@@ -361,15 +441,18 @@ export default function EditLapangan({
                       event.target.value
                     )
                   }
+                  disabled={loading}
                   rows={4}
-                  className="w-full resize-none rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none"
+                  className="w-full resize-none rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-50"
                 />
               </div>
 
-              {/* URL GAMBAR */}
+              {/* =================================================
+                  URL GAMBAR
+              ================================================= */}
 
               <div>
-                <label className="mb-2 block text-sm font-semibold">
+                <label className="mb-2 block text-sm font-semibold text-slate-800">
                   URL Gambar
                 </label>
 
@@ -381,12 +464,15 @@ export default function EditLapangan({
                       event.target.value
                     )
                   }
+                  disabled={loading}
                   placeholder="/uploads/lapangan.jpg"
-                  className="h-11 w-full rounded-xl border border-slate-200 px-4 text-sm outline-none"
+                  className="h-11 w-full rounded-xl border border-slate-200 px-4 text-sm outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-50"
                 />
 
+                {/* PREVIEW GAMBAR */}
+
                 {formPictureUrl && (
-                  <div className="mt-3 overflow-hidden rounded-xl">
+                  <div className="mt-3 overflow-hidden rounded-xl border border-slate-200">
                     <img
                       src={formPictureUrl}
                       alt={formName}
@@ -396,7 +482,9 @@ export default function EditLapangan({
                 )}
               </div>
 
-              {/* BUTTON */}
+              {/* =================================================
+                  BUTTON
+              ================================================= */}
 
               <div className="flex justify-end gap-3 border-t border-slate-100 pt-5">
 
@@ -404,7 +492,7 @@ export default function EditLapangan({
                   type="button"
                   onClick={closeModal}
                   disabled={loading}
-                  className="h-11 rounded-xl border border-slate-200 px-5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
+                  className="h-11 rounded-xl border border-slate-200 px-5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   Batal
                 </button>
@@ -412,7 +500,7 @@ export default function EditLapangan({
                 <button
                   type="submit"
                   disabled={loading}
-                  className="h-11 rounded-xl bg-green-950 px-5 text-sm font-semibold text-white transition hover:bg-green-800 disabled:opacity-50"
+                  className="h-11 rounded-xl bg-green-950 px-5 text-sm font-semibold text-white transition hover:bg-green-800 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {loading
                     ? "Menyimpan..."
@@ -420,6 +508,7 @@ export default function EditLapangan({
                 </button>
 
               </div>
+
             </form>
           </div>
         </div>
